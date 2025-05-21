@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class CustomRandomForestModel(AbstractModel):
-    """The most implementation of a scikit-learn API compatible model.
+    """Minimal implementation of a model compatible with the scikit-learn API.
     For more details on how to implement an abstract model, see https://auto.gluon.ai/stable/tutorials/tabular/advanced/tabular-custom-model.html
     and compare to implementations of models under tabrepo.benchmark/models/ag/.
     """
