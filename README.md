@@ -4,25 +4,34 @@ This repository contains examples for benchmarking predictive machine learning m
 
 ## Content Overview
 
+* `./tabarena_minimal_example/` - contains a minimal example of how to use TabArena for benchmarking.
 * `./tabflow_slurm/` - contains code for benchmarking with TabArena on a SLURM cluster.
 
 ## Install Benchmarking Environment
 
+We recommend to use `uv` and Python 3.11 and a Linux OS. The tutorial below already integrates this into the installation process.
+
 ```bash
 pip install uv
+uv venv --seed --python 3.11 ~/.venvs/tabarena_gpu  # We recommend to create the venv on a workspace instead of the home directory.
+source ~/.venvs/tabarena_gpu
+# which python # to get the path to the python executable that one can use to link the venv to an IDE.
 
 # get editable external libraries
-cd e_libs
-git clone https://github.com/autogluon/autogluon
-git clone --branch tabarena_lop https://github.com/LennartPurucker/tabrepo.git
+cd external_libs
+git clone --branch tabarena https://github.com/autogluon/tabrepo.git
 
-./autogluon/full_install.sh
 # use GIT_LFS_SKIP_SMUDGE=1 in front of the command if installing TabDPT fails du broken LFS/pip setup. 
-uv pip install -e tabrepo/[benchmark]
+GIT_LFS_SKIP_SMUDGE=1 uv pip install -e tabrepo/[benchmark]
 
 # When planning to only run experiments on CPU, also run the following:
 uv pip install -U torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu
 ```
 
-For PyCharm users, remember to mark `tabrepo` and `src` directories under `autogluon/*/src` as Source Roots (right click
+For PyCharm users, remember to mark `tabrepo` under `external_libs` as Source Roots (right click
 -> Mark Directory as -> Source Root).
+
+Test your installation via the code below. This might take some time to download the foundation models, see `tabflow_slurm/benchmarking_setup/download_all_foundation_models.py` to download all models beforehand if needed.
+```bash
+pytest external_libs/tabrepo/tst/benchmark/models/
+```

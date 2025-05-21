@@ -140,3 +140,5 @@ AutoGluonModels/
 
 tabarena_dataset_metadata.csv
 slurm_run_data.json
+
+tabarena_minimal_example/tabarena_out/
