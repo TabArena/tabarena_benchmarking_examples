@@ -8,3 +8,4 @@ It includes the following files:
 - `run_tabarena_lite.py` - Example for running TabArena-Lite with the custom model.
 - (TODO) `evaluate_custom_model.py` - Example for evaluating the custom model with TabArena-Lite
   vs. the leaderboard.
+- `run_tabarena_model.py` - Example for running a model from TabArena on a new dataset (without the benchmarking code of TabArena).
