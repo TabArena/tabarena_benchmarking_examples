@@ -1,7 +1,7 @@
 """Example of a custom TabArena Model for a Random Forest model.
 
 Note: due to the pickle protocol used in TabArena, the model class must be in a separate
-file then the main script running the experiments!
+file and not in the main script running the experiments!
 """
 
 from __future__ import annotations
