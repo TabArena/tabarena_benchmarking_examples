@@ -20,7 +20,7 @@ source ~/.venvs/tabarena
 cd external_libs
 git clone --branch tabarena https://github.com/autogluon/tabrepo.git
 
-# use GIT_LFS_SKIP_SMUDGE=1 in front of the command if installing TabDPT fails due to a broken LFS/pip setup. 
+# use GIT_LFS_SKIP_SMUDGE=1 in front of the command if installing TabDPT fails due to a broken LFS/pip setup
 GIT_LFS_SKIP_SMUDGE=1 uv pip install -e tabrepo/[benchmark]
 
 # When planning to only run experiments on CPU, also run the following:
