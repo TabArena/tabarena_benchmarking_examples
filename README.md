@@ -13,15 +13,14 @@ We recommend to use `uv` and Python 3.11 and a Linux OS. The tutorial below alre
 
 ```bash
 pip install uv
-uv venv --seed --python 3.11 ~/.venvs/tabarena_gpu  # We recommend to create the venv on a workspace instead of the home directory.
-source ~/.venvs/tabarena_gpu
-# which python # to get the path to the python executable that one can use to link the venv to an IDE.
+uv venv --seed --python 3.11 ~/.venvs/tabarena
+source ~/.venvs/tabarena
 
 # get editable external libraries
 cd external_libs
 git clone --branch tabarena https://github.com/autogluon/tabrepo.git
 
-# use GIT_LFS_SKIP_SMUDGE=1 in front of the command if installing TabDPT fails du broken LFS/pip setup. 
+# use GIT_LFS_SKIP_SMUDGE=1 in front of the command if installing TabDPT fails due to a broken LFS/pip setup. 
 GIT_LFS_SKIP_SMUDGE=1 uv pip install -e tabrepo/[benchmark]
 
 # When planning to only run experiments on CPU, also run the following:
