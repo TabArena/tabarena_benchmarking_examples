@@ -32,7 +32,6 @@ def post_process_local_results(output_dir: str):
     return repo
 
 
-
 def rename_default(config_type: str) -> str:
     return f"{config_type} (default)"
 
@@ -47,31 +46,29 @@ def evaluate_custom_model(output_dir: str):
     """
     post_process_local_results(output_dir=output_dir)
     repo: EvaluationRepository = EvaluationRepository.from_dir(REPO_DIR)
-    repo.set_config_fallback(repo.configs()[0])  # tmp: need to set a fallback config in case missing results are present
+    repo.set_config_fallback(repo.configs()[0])
 
     plotter = PaperRunTabArena(repo=repo, output_dir="example_artifacts", backend="native")
     df_results = plotter.run_no_sim()
 
     is_default = df_results["framework"].str.contains("_c1_") & (df_results["method_type"] == "config")
     df_results.loc[is_default, "framework"] = df_results.loc[is_default]["config_type"].apply(rename_default)
-
     datasets = list(df_results["dataset"].unique())
     folds = list(df_results["fold"].unique())
     config_types = list(df_results["config_type"].unique())
 
-    df_results_w_norm_err, df_results_holdout_w_norm_err, datasets_tabpfn, datasets_tabicl = load_paper_results(
+    df_results_w_norm_err, _, _, _ = load_paper_results(
         load_from_s3=True,  # Set to false in future runs for faster runtime
     )
-    df_results_w_norm_err = df_results_w_norm_err[df_results_w_norm_err["fold"].isin(folds)]
-    df_results_w_norm_err = df_results_w_norm_err[df_results_w_norm_err["dataset"].isin(datasets)]
+    df_results_w_norm_err = df_results_w_norm_err[df_results_w_norm_err["fold"].isin(folds) & df_results_w_norm_err["dataset"].isin(datasets)]
+    df_results = PaperRunTabArena.compute_normalized_error_dynamic(df_results=pd.concat([df_results, df_results_w_norm_err], ignore_index=True))
 
-    df_results = pd.concat([df_results, df_results_w_norm_err], ignore_index=True)
-    df_results = PaperRunTabArena.compute_normalized_error_dynamic(df_results=df_results)
-
+    # Saves results to the ./example_artifacts/ directory. Our new model is called CRF.
     plotter.eval(
         df_results=df_results,
         framework_types_extra=config_types,
     )
+
 
 
 if __name__ == "__main__":
