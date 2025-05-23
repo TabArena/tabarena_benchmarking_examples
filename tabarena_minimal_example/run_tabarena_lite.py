@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import openml
-from tabarena_minimal_example.custom_tabarena_model import get_configs_for_custom_rf
+from custom_tabarena_model import get_configs_for_custom_rf
 from tabrepo.benchmark.experiment import run_experiments
 
 
