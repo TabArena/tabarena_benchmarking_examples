@@ -7,6 +7,13 @@ This repository contains examples for benchmarking predictive machine learning m
 * `./tabarena_minimal_example/` - contains a minimal example of how to use TabArena for benchmarking.
 * `./tabflow_slurm/` - contains code for benchmarking with TabArena on a SLURM cluster.
 
+## Download Benchmarking Examples Repo
+
+```bash
+git clone https://github.com/TabArena/tabarena_benchmarking_examples.git
+cd tabarena_benchmarking_examples
+```
+
 ## Install Benchmarking Environment
 
 We recommend to use `uv` and Python 3.11 and a Linux OS. The tutorial below already integrates this into the installation process.
