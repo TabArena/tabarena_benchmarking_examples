@@ -163,9 +163,16 @@ def get_model_configs_to_benchmark(
 
     if sequential_fold_fitting:
         for m_i in range(len(experiments_lst)):
-            if "ag_args_ensemble" not in experiments_lst[m_i].method_kwargs["model_hyperparameters"]:
-                experiments_lst[m_i].method_kwargs["model_hyperparameters"]["ag_args_ensemble"] = {}
-            experiments_lst[m_i].method_kwargs["model_hyperparameters"]["ag_args_ensemble"]["fold_fitting_strategy"] = "sequential_local"
+            if (
+                "ag_args_ensemble"
+                not in experiments_lst[m_i].method_kwargs["model_hyperparameters"]
+            ):
+                experiments_lst[m_i].method_kwargs["model_hyperparameters"][
+                    "ag_args_ensemble"
+                ] = {}
+            experiments_lst[m_i].method_kwargs["model_hyperparameters"][
+                "ag_args_ensemble"
+            ]["fold_fitting_strategy"] = "sequential_local"
 
     return experiments_lst
 
@@ -175,11 +182,11 @@ def run_tabarena_with_custom_dataset() -> None:
     output_dir = str(Path(__file__).parent / "tabarena_out_custom_dataset")
 
     # Get all tasks from TabArena-v0.1
-    tasks = [get_custom_classification_task(),get_custom_regression_task()]
+    tasks = [get_custom_classification_task(), get_custom_regression_task()]
 
     # Gets 1 default and 1 random config
     model_experiments = get_model_configs_to_benchmark(
-        model_names=["RealMLP", "TabM", "LightGBM", "CatBoost"],
+        model_names=["Linear", "KNN"],
         num_random_configs=1,
         custom_rf=True,  # Example of including a custom model in your benchmark.
     )
@@ -191,9 +198,69 @@ def run_tabarena_with_custom_dataset() -> None:
         repetitions_mode="TabArena-Lite",
     )
 
-def run_evaluate_results_on_custom_dataset() -> None:
-    pass
+
+def run_example_for_evaluate_results_on_custom_dataset() -> None:
+    """Example for evaluating the cached results with similar plots to the TabArena paper."""
+    from tabrepo import EvaluationRepository
+    from tabrepo.nips2025_utils.fetch_metadata import load_task_metadata
+    from tabrepo.nips2025_utils.generate_repo import generate_repo
+    from tabrepo.paper.paper_runner_tabarena import PaperRunTabArena
+
+    output_dir = str(Path(__file__).parent / "tabarena_out_custom_dataset")
+    repo_dir = str(Path(__file__).parent / "repos" / "ExampleCustomDatasetRepo")
+
+    clf_task, reg_task = get_custom_classification_task(), get_custom_regression_task()
+
+    # TODO: improve how users can pass only the required metadata to the eval code.
+    task_metadata = load_task_metadata(paper=True)
+    task_metadata = pd.DataFrame(columns=task_metadata.columns)
+    task_metadata["tid"] = [clf_task.task_id, reg_task.task_id]
+    task_metadata["name"] = [f"Task-{clf_task.task_id}", f"Task-{reg_task.task_id}"]
+    task_metadata["task_type"] = ["Supervised Classification", "Supervised Regression"]
+    task_metadata["dataset"] = [f"Task-{clf_task.task_id}", f"Task-{reg_task.task_id}"]
+    task_metadata["NumberOfInstances"] = [
+        len(clf_task._dataset),
+        len(reg_task._dataset),
+    ]
+
+    repo: EvaluationRepository = generate_repo(
+        experiment_path=output_dir, task_metadata=task_metadata
+    )
+    repo.to_dir(repo_dir)
+    repo: EvaluationRepository = EvaluationRepository.from_dir(repo_dir)
+    repo.set_config_fallback(repo.configs()[0])
+
+    plotter = PaperRunTabArena(
+        repo=repo, output_dir="example_artifacts", backend="native"
+    )
+    df_results = plotter.run_no_sim()
+
+    is_default = df_results["framework"].str.contains("_c1_") & (
+        df_results["method_type"] == "config"
+    )
+    df_results.loc[is_default, "framework"] = df_results.loc[is_default][
+        "config_type"
+    ].apply(lambda c: f"{c} (default)")
+
+    config_types = list(df_results["config_type"].unique())
+
+    # df_results now has all the results one could use for plotting.
+    df_results = PaperRunTabArena.compute_normalized_error_dynamic(
+        df_results=df_results
+    )
+
+    # Create plots with the eval code from the paper.
+    # Saves results to the ./example_artifacts/ directory.
+    plotter.eval(
+        df_results=df_results,
+        framework_types_extra=config_types,
+        baselines=None,
+        task_metadata=task_metadata,
+        calibration_framework="LR (default)",
+        plot_cdd=False,
+    )
+
 
 if __name__ == "__main__":
     run_tabarena_with_custom_dataset()
-    run_evaluate_results_on_custom_dataset()
+    run_example_for_evaluate_results_on_custom_dataset()
