@@ -135,6 +135,9 @@ def run_experiment(
             method["model_hyperparameters"]["ag_args_fit"] = {}
         # Default to 1 GPU per fit if multiple GPUs are available
         method["model_hyperparameters"]["ag_args_fit"]["num_gpus"] = 1 if num_gpus > 0 else 0
+        if num_gpus == 1:
+            # In this case, we can use all CPUs for fitting, as we have only one GPU for fitting anyhow.
+            method["model_hyperparameters"]["ag_args_fit"]["num_cpus"] = num_cpus
 
         if sequential_local_fold_fitting:
             if "ag_args_ensemble" not in method["model_hyperparameters"]:
