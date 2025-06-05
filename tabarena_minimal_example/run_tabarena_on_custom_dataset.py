@@ -11,6 +11,15 @@ from sklearn.model_selection import RepeatedStratifiedKFold, train_test_split
 from tabrepo.benchmark.experiment import run_experiments_new
 from tabrepo.benchmark.task import UserTask
 
+REPO_DIR = str(Path(__file__).parent / "repos" / "custom_dataset")
+"""Cache location for the aggregated results."""
+
+TABARENA_DIR = str(Path(__file__).parent / "tabarena_out" / "custom_dataset")
+"""Output directory for saving the results and result artifacts from TabArena."""
+
+EVAL_DIR = str(Path(__file__).parent / "evals" / "custom_dataset")
+"""Output for artefacts from the evaluation results of the custom model."""
+
 
 def get_custom_classification_task() -> UserTask:
     """Example for defining a custom classification task/dataset to run with for TabArena."""
@@ -179,8 +188,6 @@ def get_model_configs_to_benchmark(
 
 def run_tabarena_with_custom_dataset() -> None:
     """Run TabArena on a custom dataset."""
-    output_dir = str(Path(__file__).parent / "tabarena_out_custom_dataset")
-
     # Get all tasks from TabArena-v0.1
     tasks = [get_custom_classification_task(), get_custom_regression_task()]
 
@@ -192,7 +199,7 @@ def run_tabarena_with_custom_dataset() -> None:
     )
 
     run_experiments_new(
-        output_dir=output_dir,
+        output_dir=TABARENA_DIR,
         model_experiments=model_experiments,
         tasks=tasks,
         repetitions_mode="TabArena-Lite",
@@ -206,9 +213,6 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
     from tabrepo.nips2025_utils.generate_repo import generate_repo
     from tabrepo.paper.paper_runner_tabarena import PaperRunTabArena
 
-    output_dir = str(Path(__file__).parent / "tabarena_out_custom_dataset")
-    repo_dir = str(Path(__file__).parent / "repos" / "ExampleCustomDatasetRepo")
-
     clf_task, reg_task = get_custom_classification_task(), get_custom_regression_task()
 
     # TODO: improve how users can pass only the required metadata to the eval code.
@@ -217,22 +221,23 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
     task_metadata["tid"] = [clf_task.task_id, reg_task.task_id]
     task_metadata["name"] = [clf_task.tabarena_task_name, reg_task.tabarena_task_name]
     task_metadata["task_type"] = ["Supervised Classification", "Supervised Regression"]
-    task_metadata["dataset"] = [clf_task.tabarena_task_name, reg_task.tabarena_task_name]
+    task_metadata["dataset"] = [
+        clf_task.tabarena_task_name,
+        reg_task.tabarena_task_name,
+    ]
     task_metadata["NumberOfInstances"] = [
         len(clf_task._dataset),
         len(reg_task._dataset),
     ]
 
     repo: EvaluationRepository = generate_repo(
-        experiment_path=output_dir, task_metadata=task_metadata
+        experiment_path=TABARENA_DIR, task_metadata=task_metadata
     )
-    repo.to_dir(repo_dir)
-    repo: EvaluationRepository = EvaluationRepository.from_dir(repo_dir)
+    repo.to_dir(REPO_DIR)
+    repo: EvaluationRepository = EvaluationRepository.from_dir(REPO_DIR)
     repo.set_config_fallback(repo.configs()[0])
 
-    plotter = PaperRunTabArena(
-        repo=repo, output_dir="custom_dataset_eval", backend="native"
-    )
+    plotter = PaperRunTabArena(repo=repo, output_dir=EVAL_DIR, backend="native")
     df_results = plotter.run_no_sim()
 
     is_default = df_results["framework"].str.contains("_c1_") & (

@@ -134,6 +134,8 @@ autogluon/
 .pkl
 .idea
 
+AutogluonModels/
+**/AutogluonModels/
 AutoGluonModels/
 **/AutoGluonModels/
 **/core.*
@@ -142,3 +144,6 @@ tabarena_dataset_metadata.csv
 slurm_run_data.json
 
 tabarena_minimal_example/tabarena_out/
+tabarena_minimal_example/repos/
+tabarena_minimal_example/evals/
+tabarena_minimal_example/tabarena_paper_full_51/
