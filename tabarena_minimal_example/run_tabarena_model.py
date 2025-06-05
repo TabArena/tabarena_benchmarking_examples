@@ -3,6 +3,7 @@
 As all models in TabArena are (custom) AutoGluon models, we can use the API from AutoGluon to train, evaluate,
 and deploy them. For details, see https://auto.gluon.ai/stable/tutorials/tabular/advanced/tabular-custom-model.html
 """
+
 from __future__ import annotations
 
 from autogluon.core.data import LabelCleaner
@@ -16,10 +17,18 @@ from tabrepo.benchmark.models.ag.realmlp.realmlp_model import RealMLPModel
 
 # Get Data
 X, y = load_breast_cancer(return_X_y=True, as_frame=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.5, random_state=42
+)
 # Preprocessing
-feature_generator, label_cleaner = AutoMLPipelineFeatureGenerator(), LabelCleaner.construct(problem_type="binary", y=y)
-X_train, y_train = feature_generator.fit_transform(X_train), label_cleaner.transform(y_train)
+feature_generator, label_cleaner = (
+    AutoMLPipelineFeatureGenerator(),
+    LabelCleaner.construct(problem_type="binary", y=y),
+)
+X_train, y_train = (
+    feature_generator.fit_transform(X_train),
+    label_cleaner.transform(y_train),
+)
 X_test, y_test = feature_generator.transform(X_test), label_cleaner.transform(y_test)
 
 # Train TabArena Model

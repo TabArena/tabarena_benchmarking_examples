@@ -6,7 +6,7 @@ from pathlib import Path
 
 import openml
 from custom_tabarena_model import get_configs_for_custom_rf
-from tabrepo.benchmark.experiment import run_experiments
+from tabrepo.benchmark.experiment import run_experiments_new
 
 
 def run_tabarena_lite_for_custom_rf(output_dir: str):
@@ -20,28 +20,17 @@ def run_tabarena_lite_for_custom_rf(output_dir: str):
     """
     # Get all tasks from TabArena-v0.1
     task_ids = openml.study.get_suite("tabarena-v0.1").tasks
-    # This might take a while, as it initializes the cache and downloads the datasets.
-    task_metadata = {
-        task_id: openml.tasks.get_task(task_id).get_dataset().name
-        for task_id in task_ids
-    }
 
     # Gets 1 default and 1 random config
-    methods = get_configs_for_custom_rf(default_config=True, num_random_configs=1)
+    model_experiments = get_configs_for_custom_rf(
+        default_config=True, num_random_configs=1, sequential_fold_fitting=True,
+    )
 
-    run_experiments(
-        expname=output_dir,
-        tids=task_ids,
-        task_metadata=task_metadata,
-        methods=methods,
-        ignore_cache=False,  # If True, rerun and overwrite existing results.
-        # TabArena-Lite only runs on the first split of each dataset.
-        repeat_fold_pairs=[(0, 0)],
-        folds=None,
-        repeats=None,
-        # Other args
-        cache_cls_kwargs={"include_self_in_call": True},
-        debug_mode=False,
+    run_experiments_new(
+        output_dir=output_dir,
+        model_experiments=model_experiments,
+        tasks=task_ids,
+        repetitions_mode="TabArena-Lite",
     )
 
 

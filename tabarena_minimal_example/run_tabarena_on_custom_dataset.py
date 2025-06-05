@@ -215,9 +215,9 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
     task_metadata = load_task_metadata(paper=True)
     task_metadata = pd.DataFrame(columns=task_metadata.columns)
     task_metadata["tid"] = [clf_task.task_id, reg_task.task_id]
-    task_metadata["name"] = [f"Task-{clf_task.task_id}", f"Task-{reg_task.task_id}"]
+    task_metadata["name"] = [clf_task.tabarena_task_name, reg_task.tabarena_task_name]
     task_metadata["task_type"] = ["Supervised Classification", "Supervised Regression"]
-    task_metadata["dataset"] = [f"Task-{clf_task.task_id}", f"Task-{reg_task.task_id}"]
+    task_metadata["dataset"] = [clf_task.tabarena_task_name, reg_task.tabarena_task_name]
     task_metadata["NumberOfInstances"] = [
         len(clf_task._dataset),
         len(reg_task._dataset),
@@ -231,7 +231,7 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
     repo.set_config_fallback(repo.configs()[0])
 
     plotter = PaperRunTabArena(
-        repo=repo, output_dir="example_artifacts", backend="native"
+        repo=repo, output_dir="custom_dataset_eval", backend="native"
     )
     df_results = plotter.run_no_sim()
 
@@ -250,7 +250,7 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
     )
 
     # Create plots with the eval code from the paper.
-    # Saves results to the ./example_artifacts/ directory.
+    # Saves results to the ./custom_dataset_eval/ directory.
     plotter.eval(
         df_results=df_results,
         framework_types_extra=config_types,
