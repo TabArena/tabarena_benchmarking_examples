@@ -25,7 +25,7 @@ source ~/.venvs/tabarena
 
 # get editable external libraries
 cd external_libs
-git clone --branch tabarena https://github.com/autogluon/tabrepo.git
+git clone --branch main https://github.com/autogluon/tabrepo.git
 
 # use GIT_LFS_SKIP_SMUDGE=1 in front of the command if installing TabDPT fails due to a broken LFS/pip setup
 GIT_LFS_SKIP_SMUDGE=1 uv pip install -e tabrepo/[benchmark]
