@@ -105,7 +105,7 @@ class BenchmarkSetupGPUModels:
     """Limit the number of random configs to run per model class in TabArena-Lite."""
 
     problem_types_to_run: list[str] = field(
-        # Options: "classification", "regression", "multiclass"
+        # Options: "binary", "regression", "multiclass"
         default_factory=lambda: [
             "binary",
             "regression",
