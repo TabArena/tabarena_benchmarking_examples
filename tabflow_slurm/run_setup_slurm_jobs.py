@@ -36,7 +36,9 @@ For our system, we used a structure as follows:
 class BenchmarkSetupGPUModels:
     """Manually set the parameters for the benchmark run."""
 
-    metadata: str = BASE_PATH + "code/tabarena/tabflow_slurm/tabarena_dataset_metadata.csv"
+    metadata: str = (
+        BASE_PATH + "code/tabarena/tabflow_slurm/tabarena_dataset_metadata.csv"
+    )
     """Dataset/task Metadata for TabArena, download this csv from: https://github.com/TabArena/dataset_curation/blob/main/dataset_creation_scripts/metadata/tabarena_dataset_metadata.csv
     Adjust as needed to run less datasets/tasks or create a new constraint used for filtering."""
 
@@ -48,7 +50,9 @@ class BenchmarkSetupGPUModels:
     """Python executable and environment to use for the SLURM jobs. This should point to a Python
     executable within a (virtual) environment."""
 
-    run_script: str = BASE_PATH + "code/tabarena/tabflow_slurm/run_tabarena_experiment.py"
+    run_script: str = (
+        BASE_PATH + "code/tabarena/tabflow_slurm/run_tabarena_experiment.py"
+    )
     """Python script to run the benchmark. This should point to the script that runs the benchmark
     for TabArena."""
 
@@ -79,7 +83,9 @@ class BenchmarkSetupGPUModels:
     methods_per_job: int = 5
     """Batching of several experiments per job. This is used to reduce the number of SLURM jobs.
     Adjust the time limit in the slurm_script accordingly."""
-    sequential_local_fold_fitting: bool = True  # Do not use Ray for GPU-fitting for now.
+    sequential_local_fold_fitting: bool = (
+        True  # Do not use Ray for GPU-fitting for now.
+    )
     """Use Ray for local fold fitting. This is used to speed up the local fold fitting. For CPU
     runs, or if multiple GPUs are available, this should be set to False"""
     setup_ray_for_slurm_shared_resources_environment: bool = False
@@ -88,7 +94,9 @@ class BenchmarkSetupGPUModels:
 
     tabarena_lite: bool = False
     """Run only TabArena-Lite, that is: only the first split of each dataset, and the default
-    configuration and up to 25 random configs."""
+    configuration and up to `tabarena_lite_n_configs` random configs."""
+    tabarena_lite_n_configs: int = 25
+    """Limit the number of random configs to run per model class in TabArena-Lite."""
 
     ignore_cache: bool = False
     """If True, will overwrite the cache and run all jobs again."""
@@ -96,7 +104,9 @@ class BenchmarkSetupGPUModels:
     cache_cls: CacheFunctionPickle = CacheFunctionPickle
     """How to save the cache. Pickle is the current recommended default. This option and the two
     below must be in sync with the cache method in run_script."""
-    cache_cls_kwargs: dict = field(default_factory=lambda: {"include_self_in_call": True})
+    cache_cls_kwargs: dict = field(
+        default_factory=lambda: {"include_self_in_call": True}
+    )
     """Arguments for the cache class. This is used to setup the cache class for the benchmark."""
     cache_path_format: str = "name_first"
     """Path format for the cache. This is used to setup the cache path format for the benchmark."""
@@ -118,7 +128,10 @@ class BenchmarkSetupGPUModels:
         if self.tabarena_lite:
             # Keep first default and the 25 first random configs per model class
             # -> Assumes name suffixes have been set correctly for the configs!
-            assert all("name_suffix" in e.get("model_hyperparameters", {}).get("ag_args", {}) for e in configs), (
+            assert all(
+                "name_suffix" in e.get("model_hyperparameters", {}).get("ag_args", {})
+                for e in configs
+            ), (
                 f"All configs should have a name_suffix in the model_hyperparameters.ag_args in the YAML files, please update: {self.configs}."
             )
             configs = [
@@ -127,18 +140,33 @@ class BenchmarkSetupGPUModels:
                 if (
                     (config["model_hyperparameters"]["ag_args"]["name_suffix"] == "_c1")
                     or (
-                        (config["model_hyperparameters"]["ag_args"]["name_suffix"].startswith("_r"))
-                        and (int(config["model_hyperparameters"]["ag_args"]["name_suffix"][2:]) <= 25)
+                        (
+                            config["model_hyperparameters"]["ag_args"][
+                                "name_suffix"
+                            ].startswith("_r")
+                        )
+                        and (
+                            int(
+                                config["model_hyperparameters"]["ag_args"][
+                                    "name_suffix"
+                                ][2:]
+                            )
+                            <= self.tabarena_lite_n_configs
+                        )
                     )
                 )
             ]
 
         jobs = []
-        total_jobs = (metadata["num_folds"] * metadata["tabarena_num_repeats"]).sum() * len(configs)
+        total_jobs = (
+            metadata["num_folds"] * metadata["tabarena_num_repeats"]
+        ).sum() * len(configs)
         to_run_jobs = 0
         pbar = tqdm(desc="Checking Cache and Filter Invalid Jobs", total=total_jobs)
         for row in metadata.itertuples():
-            repeats_folds = product(range(int(row.tabarena_num_repeats)), range(int(row.num_folds)))
+            repeats_folds = product(
+                range(int(row.tabarena_num_repeats)), range(int(row.num_folds))
+            )
             if self.tabarena_lite:  # Filter to only first split.
                 repeats_folds = list(repeats_folds)[:1]
 
@@ -146,15 +174,23 @@ class BenchmarkSetupGPUModels:
                 all_configs = list(enumerate(configs))
                 while len(all_configs) > 0:
                     config_batch = []
-                    while (len(config_batch) < self.methods_per_job) and (len(all_configs) > 0):
+                    while (len(config_batch) < self.methods_per_job) and (
+                        len(all_configs) > 0
+                    ):
                         config_index, config = all_configs.pop(0)
 
                         # Filter out-of-constraints datasets
                         if (
                             # Skip TabICL if the dataset cannot run it
-                            ((config["model_cls"] == "TabICLModel") and (not row.can_run_tabicl))
+                            (
+                                (config["model_cls"] == "TabICLModel")
+                                and (not row.can_run_tabicl)
+                            )
                             # Skip TabPFN if the dataset cannot run it
-                            or ((config["model_cls"] == "TabPFNV2Model") and (not row.can_run_tabpfnv2))
+                            or (
+                                (config["model_cls"] == "TabPFNV2Model")
+                                and (not row.can_run_tabpfnv2)
+                            )
                         ):
                             # Reset total_jobs and update progress bar
                             total_jobs -= 1
@@ -180,13 +216,13 @@ class BenchmarkSetupGPUModels:
 
                     if config_batch:
                         jobs.append(
-                            dict(
-                                dataset_name=row.dataset_name,
-                                task_id=row.task_id,
-                                fold=fold_i,
-                                repeat=repeat_i,
-                                config_index=config_batch,
-                            ),
+                            {
+                                "dataset_name": row.dataset_name,
+                                "task_id": row.task_id,
+                                "fold": fold_i,
+                                "repeat": repeat_i,
+                                "config_index": config_batch,
+                            },
                         )
         print(f"Generated {to_run_jobs}/{total_jobs} jobs to run without batching.")
         print(f"Jobs with batching: {len(jobs)}")
@@ -194,21 +230,21 @@ class BenchmarkSetupGPUModels:
 
     def get_jobs_dict(self):
         jobs = list(self.get_jobs_to_run())
-        default_args = dict(
-            python=self.python,
-            run_script=self.run_script,
-            openml_cache_dir=self.openml_cache,
-            configs_yaml_file=self.configs,
-            tabrepo_cache_dir=self.tabrepo_cache_dir,
-            output_dir=self.output_dir,
-            num_cpus=self.num_cpus,
-            num_gpus=self.num_gpus,
-            memory_limit=self.memory_limit,
-            setup_ray_for_slurm_shared_resources_environment=self.setup_ray_for_slurm_shared_resources_environment,
-            ignore_cache=self.ignore_cache,
-            sequential_local_fold_fitting=self.sequential_local_fold_fitting,
-        )
-        return dict(defaults=default_args, jobs=jobs)
+        default_args = {
+            "python": self.python,
+            "run_script": self.run_script,
+            "openml_cache_dir": self.openml_cache,
+            "configs_yaml_file": self.configs,
+            "tabrepo_cache_dir": self.tabrepo_cache_dir,
+            "output_dir": self.output_dir,
+            "num_cpus": self.num_cpus,
+            "num_gpus": self.num_gpus,
+            "memory_limit": self.memory_limit,
+            "setup_ray_for_slurm_shared_resources_environment": self.setup_ray_for_slurm_shared_resources_environment,
+            "ignore_cache": self.ignore_cache,
+            "sequential_local_fold_fitting": self.sequential_local_fold_fitting,
+        }
+        return {"defaults": default_args, "jobs": jobs}
 
 
 def setup_jobs():

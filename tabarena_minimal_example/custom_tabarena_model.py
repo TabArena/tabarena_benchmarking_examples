@@ -92,10 +92,21 @@ class CustomRandomForestModel(AbstractModel):
 
 
 def get_configs_for_custom_rf(
-    *, default_config: bool = True, num_random_configs: int = 1
+    *,
+    default_config: bool = True,
+    num_random_configs: int = 1,
+    sequential_fold_fitting: bool = False,
 ):
     """Generate the hyperparameter configurations to run for our custom random
     forest model.
+
+    sequential_fold_fitting: bool = False
+        If True, the model will be configured to use sequential
+        fold fitting (better for debugging, but usually slower). This is also a good
+        idea to use on SLURM or other shared compute clusters where you want to run
+        multiple jobs on the same  node.
+        See `tabflow_slurm.run_tabarena_experiment.setup_slurm_job`  for ways to
+        optimally use sequential_fold_fitting=False on SLURM.
     """
     from autogluon.common.space import Int
     from tabrepo.utils.config_utils import ConfigGenerator
@@ -112,6 +123,21 @@ def get_configs_for_custom_rf(
         manual_configs=manual_configs if default_config else None,
         search_space=search_space,
     )
-    return gen_custom_rf.generate_all_bag_experiments(
+    experiments_lst = gen_custom_rf.generate_all_bag_experiments(
         num_random_configs=num_random_configs
     )
+
+    if sequential_fold_fitting:
+        for m_i in range(len(experiments_lst)):
+            if (
+                "ag_args_ensemble"
+                not in experiments_lst[m_i].method_kwargs["model_hyperparameters"]
+            ):
+                experiments_lst[m_i].method_kwargs["model_hyperparameters"][
+                    "ag_args_ensemble"
+                ] = {}
+            experiments_lst[m_i].method_kwargs["model_hyperparameters"][
+                "ag_args_ensemble"
+            ]["fold_fitting_strategy"] = "sequential_local"
+
+    return experiments_lst
