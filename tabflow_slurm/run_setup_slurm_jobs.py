@@ -43,21 +43,26 @@ class BenchmarkSetupGPUModels:
     """Manually set the parameters for the benchmark run."""
 
     metadata: str = (
-        BASE_PATH + "code/tabarena/tabflow_slurm/tabarena_dataset_metadata.csv"
+        BASE_PATH
+        + "code/tabarena_benchmarking_examples/tabflow_slurm/tabarena_dataset_metadata.csv"
     )
     """Dataset/task Metadata for TabArena, download this csv from: https://github.com/TabArena/dataset_curation/blob/main/dataset_creation_scripts/metadata/tabarena_dataset_metadata.csv
     Adjust as needed to run less datasets/tasks or create a new constraint used for filtering."""
 
-    configs: str = BASE_PATH + "code/tabarena/tabflow_slurm/models/configs_all_gpu.yaml"
+    configs: str = (
+        BASE_PATH
+        + "code/tabarena_benchmarking_examples/tabflow_slurm/models/configs_all_gpu.yaml"
+    )
     """YAML file with the configs to run. See ./models/run_generate_tabarena_gpu_configs.py for
     how to generate this file."""
 
-    python: str = BASE_PATH + "venvs/tabarena_gpu/bin/python"
+    python: str = BASE_PATH + "venvs/tabarena_beta/bin/python"
     """Python executable and environment to use for the SLURM jobs. This should point to a Python
     executable within a (virtual) environment."""
 
     run_script: str = (
-        BASE_PATH + "code/tabarena/tabflow_slurm/run_tabarena_experiment.py"
+        BASE_PATH
+        + "code/tabarena_benchmarking_examples/tabflow_slurm/run_tabarena_experiment.py"
     )
     """Python script to run the benchmark. This should point to the script that runs the benchmark
     for TabArena."""
@@ -66,13 +71,13 @@ class BenchmarkSetupGPUModels:
     """OpenML cache directory. This is used to store dataset and tasks data from OpenML."""
     tabrepo_cache_dir: str = BASE_PATH + "input_data/tabrepo"
     """TabRepo cache directory."""
-    output_dir: str = BASE_PATH + "output/gpu_runs"
+    output_dir: str = BASE_PATH + "output/beta_tabpfn"
     """Output directory for the benchmark."""
 
     slurm_script: str = "submit_template_gpu.sh"
     """Name of the SLURM (array) script that to run on the cluster (only used to print the command
      to run)."""
-    slurm_log_output: str = BASE_PATH + "slurm_out/gpu_runs"
+    slurm_log_output: str = BASE_PATH + "slurm_out/beta_tabpfn"
     """Directory for the SLURM output logs. This is used to store the output logs from the
     SLURM jobs."""
 
@@ -98,16 +103,16 @@ class BenchmarkSetupGPUModels:
     """Prepare Ray for a SLURM shared resource environment. This is used to setup Ray for SLURM
     shared resources. Recommended to set to True if sequential_local_fold_fitting is False."""
 
-    tabarena_lite: bool = False
+    tabarena_lite: bool = True
     """Run only TabArena-Lite, that is: only the first split of each dataset, and the default
     configuration and up to `tabarena_lite_n_configs` random configs."""
     tabarena_lite_n_configs: int = 25
     """Limit the number of random configs to run per model class in TabArena-Lite."""
 
     problem_types_to_run: list[str] = field(
-        # Options: "classification", "regression", "multiclass"
+        # Options: "binary", "regression", "multiclass"
         default_factory=lambda: [
-            "classification",
+            "binary",
             "multiclass",
         ]
     )
