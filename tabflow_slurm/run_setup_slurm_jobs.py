@@ -107,7 +107,8 @@ class BenchmarkSetupGPUModels:
     problem_types_to_run: list[str] = field(
         # Options: "classification", "regression", "multiclass"
         default_factory=lambda: [
-            "classification",
+            "binary",
+            "regression",
             "multiclass",
         ]
     )
