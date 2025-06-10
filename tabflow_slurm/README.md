@@ -29,7 +29,7 @@ as possible in the future.
    directory, for example:
 
 ```bash
-source /work/dlclarge2/purucker-tabarena/venvs/tabarena_gpu/bin/activate && cd /work/dlclarge2/purucker-tabarena/code/tabarena/tabflow_slurm
+source /work/dlclarge2/purucker-tabarena/venvs/tabarena_beta/bin/activate && cd /work/dlclarge2/purucker-tabarena/code/tabarena_benchmarking_examples/tabflow_slurm
 ```
 
 5. Run `run_setup_slurm_jobs.py` to set up all data needed to run array jobs and submit the array job to the slurm

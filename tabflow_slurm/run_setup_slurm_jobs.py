@@ -103,7 +103,7 @@ class BenchmarkSetupGPUModels:
     """Prepare Ray for a SLURM shared resource environment. This is used to setup Ray for SLURM
     shared resources. Recommended to set to True if sequential_local_fold_fitting is False."""
 
-    tabarena_lite: bool = True
+    tabarena_lite: bool = False
     """Run only TabArena-Lite, that is: only the first split of each dataset, and the default
     configuration and up to `tabarena_lite_n_configs` random configs."""
     tabarena_lite_n_configs: int = 25
