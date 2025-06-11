@@ -14,7 +14,7 @@ from pathlib import Path
 import pandas as pd
 import ray
 import yaml
-from ray_utils import ray_map_list, to_batch_list
+from tabflow_slurm.ray_utils import ray_map_list, to_batch_list
 from tabrepo.benchmark.experiment.experiment_utils import check_cache_hit
 from tabrepo.utils.cache import CacheFunctionPickle
 
