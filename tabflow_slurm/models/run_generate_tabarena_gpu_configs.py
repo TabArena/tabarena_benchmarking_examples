@@ -19,7 +19,8 @@ if __name__ == "__main__":
     # Potential model names and their number of configs
     experiments_lst = []
     for model_name, n_configs in [
-        ("BETA", 0),
+        ("TabFlex", 0),
+        # ("BETA", 0),
         # ("RealMLP", 50),  # 50 for GPU here
         # ("TabM", 50),  # 50 for GPU
         # ("ModernNCA", 50),  # 50 for GPU

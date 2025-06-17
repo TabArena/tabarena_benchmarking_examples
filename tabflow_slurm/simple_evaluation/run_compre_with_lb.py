@@ -16,8 +16,8 @@ from tabrepo.nips2025_utils.load_final_paper_results import load_paper_results
 from tabrepo.paper.paper_runner_tabarena import PaperRunTabArena
 
 BENCHMARK_DATA = BenchmarkSetupGPUModels()
-REPO_DIR = str(Path(__file__).parent / "repos" / "lb_eval")
-EVAL_DIR = str(Path(__file__).parent / "evals" / "lb_eval")
+REPO_DIR = str(Path(__file__).parent / "repos" / "tabflex_eval")
+EVAL_DIR = str(Path(__file__).parent / "evals" / "tabflex_eval")
 
 
 def rename_default(config_type: str) -> str:
@@ -79,7 +79,6 @@ def compare_to_lb():
         df_results=df_results,
         framework_types_extra=config_types,
         plot_extra_barplots=True,
-        show=True,
         imputed_names=["TabPFNv2"],
     )
 

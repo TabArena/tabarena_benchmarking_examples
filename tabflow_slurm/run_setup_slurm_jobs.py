@@ -71,13 +71,13 @@ class BenchmarkSetupGPUModels:
     """OpenML cache directory. This is used to store dataset and tasks data from OpenML."""
     tabrepo_cache_dir: str = BASE_PATH + "input_data/tabrepo"
     """TabRepo cache directory."""
-    output_dir: str = BASE_PATH + "output/beta_tabpfn"
+    output_dir: str = BASE_PATH + "output/tabflex"
     """Output directory for the benchmark."""
 
     slurm_script: str = "submit_template_gpu.sh"
     """Name of the SLURM (array) script that to run on the cluster (only used to print the command
      to run)."""
-    slurm_log_output: str = BASE_PATH + "slurm_out/beta_tabpfn"
+    slurm_log_output: str = BASE_PATH + "slurm_out/new_models"
     """Directory for the SLURM output logs. This is used to store the output logs from the
     SLURM jobs."""
 

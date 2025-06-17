@@ -7,8 +7,8 @@
 #SBATCH --export=ALL
 #SBATCH --gres=gpu:1,localtmp:100
 #SBATCH --propagate=NONE
-#SBATCH -o /work/dlclarge2/purucker-tabarena/slurm_out/beta_tabpfn/%A/slurm-%A_%a.out
-#SBATCH -e /work/dlclarge2/purucker-tabarena/slurm_out/beta_tabpfn/%A/slurm-%A_%a.out
+#SBATCH -o /work/dlclarge2/purucker-tabarena/slurm_out/new_models/%A/slurm-%A_%a.out
+#SBATCH -e /work/dlclarge2/purucker-tabarena/slurm_out/new_models/%A/slurm-%A_%a.out
 
 set -e
 set -u

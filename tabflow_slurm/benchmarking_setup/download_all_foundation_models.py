@@ -10,7 +10,17 @@ if __name__ == "__main__":
     download_all_models(to=model_dir)
 
     # TabICL
-    TabICLClassifier(checkpoint_version="tabicl-classifier-v1.1-0506.ckpt")._load_model()
+    TabICLClassifier(
+        checkpoint_version="tabicl-classifier-v1.1-0506.ckpt"
+    )._load_model()
 
     # TabDPT
     TabDPTModel._download_and_get_model_path()
+
+    # TabFlex
+    try:
+        from tabrepo.benchmark.models.ag.tabflex.tabflex_model import TabFlexModel
+    except ImportError:
+        print("TabFlexModel not found. Skipping downloading its models.")
+    else:
+        TabFlexModel._download_all_models()

@@ -1,9 +1,11 @@
 methods:
-- model_cls: BetaModel
+- model_cls: TabFlexModel
   model_hyperparameters:
     ag_args:
       name_suffix: _c1
-  name: BetaTabPFN_c1_BAG_L1
+    ag_args_ensemble:
+      refit_folds: true
+  name: TabFlex_c1_BAG_L1
   num_bag_folds: 8
   num_bag_sets: 1
   time_limit: 3600
