@@ -14,16 +14,18 @@ from tabrepo.models.utils import get_configs_generator_from_name
 
 if __name__ == "__main__":
     n_random_configs = 200
-    output_path = "configs_all_gpu.yaml"
+    output_path = "configs_all.yaml"
 
     # Potential model names and their number of configs
     experiments_lst = []
     for model_name, n_configs in [
-        ("TabFlex", 0),
+        # 0 because we do not have a search space yet and are just testing.
+        ("PerpetualBoosting", 0),
+        # ("TabFlex", 0),
         # ("BETA", 0),
-        # ("RealMLP", 50),  # 50 for GPU here
-        # ("TabM", 50),  # 50 for GPU
-        # ("ModernNCA", 50),  # 50 for GPU
+        # ("RealMLP", n_random_configs),
+        # ("TabM", n_random_configs),
+        # ("ModernNCA", n_random_configs),
         # ("TabDPT", 0),
         # ("TabICL", 0),
         # ("TabPFNv2", n_random_configs),
@@ -39,10 +41,14 @@ if __name__ == "__main__":
         # ("XGBoost", n_random_configs),
     ]:
         config_generator = get_configs_generator_from_name(model_name)
-        experiments_lst.append(config_generator.generate_all_bag_experiments(num_random_configs=n_configs))
+        experiments_lst.append(
+            config_generator.generate_all_bag_experiments(num_random_configs=n_configs)
+        )
 
     # Post Process experiment list
-    experiments_all: list[AGModelBagExperiment] = [exp for exp_family_lst in experiments_lst for exp in exp_family_lst]
+    experiments_all: list[AGModelBagExperiment] = [
+        exp for exp_family_lst in experiments_lst for exp in exp_family_lst
+    ]
 
     # Verify no duplicate names
     experiment_names = set()

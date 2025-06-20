@@ -51,9 +51,9 @@ class BenchmarkSetupGPUModels:
 
     configs: str = (
         BASE_PATH
-        + "code/tabarena_benchmarking_examples/tabflow_slurm/models/configs_all_gpu.yaml"
+        + "code/tabarena_benchmarking_examples/tabflow_slurm/models/configs_all.yaml"
     )
-    """YAML file with the configs to run. See ./models/run_generate_tabarena_gpu_configs.py for
+    """YAML file with the configs to run. See ./models/run_generate_tabarena_configs.py for
     how to generate this file."""
 
     python: str = BASE_PATH + "venvs/tabarena_beta/bin/python"
@@ -71,10 +71,10 @@ class BenchmarkSetupGPUModels:
     """OpenML cache directory. This is used to store dataset and tasks data from OpenML."""
     tabrepo_cache_dir: str = BASE_PATH + "input_data/tabrepo"
     """TabRepo cache directory."""
-    output_dir: str = BASE_PATH + "output/tabflex"
+    output_dir: str = BASE_PATH + "output/perpetual"
     """Output directory for the benchmark."""
 
-    slurm_script: str = "submit_template_gpu.sh"
+    slurm_script: str = "submit_template_cpu.sh"
     """Name of the SLURM (array) script that to run on the cluster (only used to print the command
      to run)."""
     slurm_log_output: str = BASE_PATH + "slurm_out/new_models"
@@ -84,7 +84,7 @@ class BenchmarkSetupGPUModels:
     num_cpus: int = 8
     """Number of CPUs to use for the SLURM jobs. The number of CPUs available on the node and in
     sync with the slurm_script."""
-    num_gpus: int = 1
+    num_gpus: int = 0
     """Number of GPUs to use for the SLURM jobs. The number of GPUs available on the node and in
     sync with the slurm_script."""
     memory_limit: int = 32
@@ -94,12 +94,10 @@ class BenchmarkSetupGPUModels:
     methods_per_job: int = 5
     """Batching of several experiments per job. This is used to reduce the number of SLURM jobs.
     Adjust the time limit in the slurm_script accordingly."""
-    sequential_local_fold_fitting: bool = (
-        True  # Do not use Ray for GPU-fitting for now.
-    )
+    sequential_local_fold_fitting: bool = False
     """Use Ray for local fold fitting. This is used to speed up the local fold fitting. For CPU
     runs, or if multiple GPUs are available, this should be set to False"""
-    setup_ray_for_slurm_shared_resources_environment: bool = False
+    setup_ray_for_slurm_shared_resources_environment: bool = True
     """Prepare Ray for a SLURM shared resource environment. This is used to setup Ray for SLURM
     shared resources. Recommended to set to True if sequential_local_fold_fitting is False."""
 
@@ -114,6 +112,7 @@ class BenchmarkSetupGPUModels:
         default_factory=lambda: [
             "binary",
             "multiclass",
+            "regression",
         ]
     )
     """Problem types to run in the benchmark. Adjust as needed to run only specific problem types."""
