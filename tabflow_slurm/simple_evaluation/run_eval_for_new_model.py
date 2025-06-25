@@ -11,7 +11,12 @@ from tabrepo.nips2025_utils.end_to_end import EndToEnd, EndToEndResults
 
 
 def run_eval_for_new_model(
-    *, path_raw: Path, fig_output_dir: Path, method: str, cache: bool = True
+    *,
+    path_raw: Path,
+    fig_output_dir: Path,
+    method: str,
+    cache: bool = False,
+    subset: str | None = None,
 ) -> None:
     """Run evaluation for a custom model on TabArena.
 
@@ -25,7 +30,9 @@ def run_eval_for_new_model(
     if cache:
         _ = EndToEnd.from_path_raw(path_raw=path_raw)
     end_to_end_results = EndToEndResults.from_cache(method=method)
-    leaderboard = end_to_end_results.compare_on_tabarena(output_dir=fig_output_dir)
+    leaderboard = end_to_end_results.compare_on_tabarena(
+        output_dir=fig_output_dir, subset=subset
+    )
     print(leaderboard)
 
 
@@ -36,11 +43,13 @@ if __name__ == "__main__":
             "method": "BetaTabPFN",
             "path_raw": "/work/dlclarge2/purucker-tabarena/output/beta_tabpfn/data",
             "fig_output_dir": fig_output_dir / "beta_tabpfn",
+            "subset": "classification",
         },
         {
             "method": "TabFlex",
             "path_raw": "/work/dlclarge2/purucker-tabarena/output/tabflex/data",
             "fig_output_dir": fig_output_dir / "tabflex",
+            "subset": "classification",
         },
         {
             "method": "PerpetualBoosting",
