@@ -257,7 +257,7 @@ if __name__ == "__main__":
             num_cpus=args.num_cpus,
             num_gpus=args.num_gpus,
             memory_limit=args.memory_limit,
-            sequential_local_fold_fitting=True,
+            sequential_local_fold_fitting=args.sequential_local_fold_fitting,
         )
     finally:
         if ray_temp_dir is not None:
