@@ -21,7 +21,7 @@ We recommend to use `uv` and Python 3.11 and a Linux OS. The tutorial below alre
 ```bash
 pip install uv
 uv venv --seed --python 3.11 ~/.venvs/tabarena
-source ~/.venvs/tabarena
+source ~/.venvs/tabarena/bin/activate
 
 # get editable external libraries
 cd external_libs
