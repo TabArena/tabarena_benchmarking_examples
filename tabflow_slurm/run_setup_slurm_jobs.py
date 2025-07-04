@@ -39,7 +39,7 @@ available to the python script."""
 
 
 @dataclass
-class BenchmarkSetupGPUModels:
+class BenchmarkSetup:
     """Manually set the parameters for the benchmark run."""
 
     metadata: str = (
@@ -48,18 +48,9 @@ class BenchmarkSetupGPUModels:
     )
     """Dataset/task Metadata for TabArena, download this csv from: https://github.com/TabArena/dataset_curation/blob/main/dataset_creation_scripts/metadata/tabarena_dataset_metadata.csv
     Adjust as needed to run less datasets/tasks or create a new constraint used for filtering."""
-
-    configs: str = (
-        BASE_PATH
-        + "code/tabarena_benchmarking_examples/tabflow_slurm/models/configs_all.yaml"
-    )
-    """YAML file with the configs to run. See ./models/run_generate_tabarena_configs.py for
-    how to generate this file."""
-
     python: str = BASE_PATH + "venvs/tabarena_beta/bin/python"
     """Python executable and environment to use for the SLURM jobs. This should point to a Python
     executable within a (virtual) environment."""
-
     run_script: str = (
         BASE_PATH
         + "code/tabarena_benchmarking_examples/tabflow_slurm/run_tabarena_experiment.py"
@@ -71,7 +62,7 @@ class BenchmarkSetupGPUModels:
     """OpenML cache directory. This is used to store dataset and tasks data from OpenML."""
     tabrepo_cache_dir: str = BASE_PATH + "input_data/tabrepo"
     """TabRepo cache directory."""
-    output_dir: str = BASE_PATH + "output/perpetual"
+    output_dir: str = BASE_PATH + "output/ebm_30062025"
     """Output directory for the benchmark."""
 
     slurm_script: str = "submit_template_cpu.sh"
@@ -91,6 +82,45 @@ class BenchmarkSetupGPUModels:
     """Memory limit for the SLURM jobs. The memory limit available on the node and in sync with
     the slurm_script."""
 
+    n_random_configs: int = 200
+    """Number of random hyperparameter configurations to run for each model"""
+    models: list[tuple[str, int | str]] = field(
+        default_factory=lambda: [
+            # -- TFMs (or similar)
+            # ("TabFlex", 0),
+            # ("BETA", 0),
+            # ("TabDPT", 0),
+            # ("TabICL", "all"),
+            # ("TabPFNv2", "all"),
+            # -- Neural networks
+            # ("RealMLP", "all"),
+            # ("ModernNCA", "all"),
+            # ("FastaiMLP", "all"),
+            # ("TorchMLP", "all"),
+            # -- Tree-based models
+            # ("PerpetualBoosting", 0),
+            # ("CatBoost", "all"),
+            ("EBM", "all"),
+            # ("ExtraTrees", "all"),
+            # ("LightGBM", "all"),
+            # ("RandomForest", "all"),
+            # ("XGBoost", "all"),
+            # -- Baselines
+            # ("KNN", 50),
+            # ("Linear", "all"),
+        ]
+    )
+    """List of models to run in the benchmark. Each tuple contains the model name
+    and the number of random hyperparameter configurations to run in addition to the
+    default configuration.
+
+    Remove or comment out models to that you do not want to run.
+
+    Some special cases are:
+        - If 0, only the default configuration is run.
+        - If "all", `n_random_configs`-many configurations are run.
+    """
+
     methods_per_job: int = 5
     """Batching of several experiments per job. This is used to reduce the number of SLURM jobs.
     Adjust the time limit in the slurm_script accordingly."""
@@ -104,8 +134,6 @@ class BenchmarkSetupGPUModels:
     tabarena_lite: bool = False
     """Run only TabArena-Lite, that is: only the first split of each dataset, and the default
     configuration and up to `tabarena_lite_n_configs` random configs."""
-    tabarena_lite_n_configs: int = 25
-    """Limit the number of random configs to run per model class in TabArena-Lite."""
 
     problem_types_to_run: list[str] = field(
         # Options: "binary", "regression", "multiclass"
@@ -129,50 +157,27 @@ class BenchmarkSetupGPUModels:
     """Arguments for the cache class. This is used to setup the cache class for the benchmark."""
     cache_path_format: str = "name_first"
     """Path format for the cache. This is used to setup the cache path format for the benchmark."""
+    configs: str = (
+        BASE_PATH
+        + "code/tabarena_benchmarking_examples/tabflow_slurm/benchmark_configs.yaml"
+    )
+    """YAML file with the configs to run. Generated from parameters above in code below."""
 
-    def get_jobs_to_run(self):
-        """Determine all jobs to run by checking the cache and filtering invalid jobs."""
+    def get_jobs_to_run(self):  # noqa: C901
+        """Determine all jobs to run by checking the cache and filtering
+        invalid jobs.
+        """
         Path(self.openml_cache).mkdir(parents=True, exist_ok=True)
         Path(self.tabrepo_cache_dir).mkdir(parents=True, exist_ok=True)
         Path(self.output_dir).mkdir(parents=True, exist_ok=True)
         Path(self.slurm_log_output).mkdir(parents=True, exist_ok=True)
 
         metadata = pd.read_csv(self.metadata)
+
+        self.generate_configs_yaml()
         # Read YAML file and get the number of configs
         with open(self.configs) as file:
             configs = yaml.safe_load(file)["methods"]
-
-        if self.tabarena_lite:
-            # Keep first default and the 25 first random configs per model class
-            # -> Assumes name suffixes have been set correctly for the configs!
-            assert all(
-                "name_suffix" in e.get("model_hyperparameters", {}).get("ag_args", {})
-                for e in configs
-            ), (
-                f"All configs should have a name_suffix in the model_hyperparameters.ag_args in the YAML files, please update: {self.configs}."
-            )
-            configs = [
-                config
-                for config in configs
-                if (
-                    (config["model_hyperparameters"]["ag_args"]["name_suffix"] == "_c1")
-                    or (
-                        (
-                            config["model_hyperparameters"]["ag_args"][
-                                "name_suffix"
-                            ].startswith("_r")
-                        )
-                        and (
-                            int(
-                                config["model_hyperparameters"]["ag_args"][
-                                    "name_suffix"
-                                ][2:]
-                            )
-                            <= self.tabarena_lite_n_configs
-                        )
-                    )
-                )
-            ]
 
         def yield_all_jobs():
             for row in metadata.itertuples():
@@ -259,7 +264,48 @@ class BenchmarkSetupGPUModels:
         print(f"Jobs with batching: {len(jobs)}")
         return jobs
 
+    def generate_configs_yaml(self):
+        """Generate the YAML file with the configurations to run based
+        on specific models to run.
+        """
+        from tabrepo.benchmark.experiment import (
+            AGModelBagExperiment,
+            YamlExperimentSerializer,
+        )
+        from tabrepo.models.utils import get_configs_generator_from_name
+
+        experiments_lst = []
+        print(
+            "Generating experiments for the following models and number of configurations:",
+            self.models,
+        )
+        for model_name, n_configs in self.models:
+            config_generator = get_configs_generator_from_name(model_name)
+            experiments_lst.append(
+                config_generator.generate_all_bag_experiments(
+                    num_random_configs=n_configs
+                )
+            )
+
+        # Post Process experiment list
+        experiments_all: list[AGModelBagExperiment] = [
+            exp for exp_family_lst in experiments_lst for exp in exp_family_lst
+        ]
+
+        # Verify no duplicate names
+        experiment_names = set()
+        for experiment in experiments_all:
+            if experiment.name not in experiment_names:
+                experiment_names.add(experiment.name)
+            else:
+                raise AssertionError(
+                    f"Found multiple instances of experiment named {experiment.name}. All experiment names must be unique!",
+                )
+
+        YamlExperimentSerializer.to_yaml(experiments=experiments_all, path=self.configs)
+
     def get_jobs_dict(self):
+        """Get the jobs to run as a dictionary with default arguments and jobs."""
         jobs = list(self.get_jobs_to_run())
         default_args = {
             "python": self.python,
@@ -279,6 +325,7 @@ class BenchmarkSetupGPUModels:
 
 
 def should_run_job_batch(*, input_data_list: list[dict], **kwargs) -> list[bool]:
+    """Batched version for Ray."""
     return [should_run_job(input_data=data, **kwargs) for data in input_data_list]
 
 
@@ -324,7 +371,7 @@ def should_run_job(
 
 
 def setup_jobs():
-    bench = BenchmarkSetupGPUModels()
+    bench = BenchmarkSetup()
     jobs_dict = bench.get_jobs_dict()
     n_jobs = len(jobs_dict["jobs"])
     if n_jobs == 0:

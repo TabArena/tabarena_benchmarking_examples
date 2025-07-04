@@ -11,26 +11,25 @@ as possible in the future.
 ## Code Overview
 
 * `benchmarking_setup/` - contains the code to set up benchmarking on SLURM (see its README for more details).
-* `models/` - contains the code to generate model configs that are to be benchmarked (see its README for more details).
 * `run_tabarena_experiment.py` - contains code to run an individual experiment. This is the code that is run in one jobs
   on the SLURM cluster.
 * `run_setup_slurm_jobs.py` - contains code to set up jobs we want to submit to the SLURM cluster (checking duplicates,
   which jobs have to be run, etc.).
-* `submit_template_gpu.sh` - contains the array job template for our SLURM jobs and is called/executed after running
+* `submit_template_*.sh` - contains the array job template for our SLURM jobs and is called/executed after running
   `run_setup_slurm_jobs.py`.
+* `simple_evaluation.py` - contains code to evaluate the results of the experiments.
 
 ## Usage Example
 
 1. Make sure to run all code in `./benchmarking_setup/`
-2. Generate the configs you want to benchmark in `./models/`.
-3. Adapt all options in `submit_template_gpu.sh` and `run_setup_slurm_jobs.py` for your local SLURM setup (partitions,
+2. Adapt all options in `submit_template_gpu.sh` and `run_setup_slurm_jobs.py` for your local SLURM setup (partitions,
    paths, etc.).
-4. In a CLI on a (login) node of the SLURM cluster, active your virtual environment and navigate to the correct
+3. In a CLI on a (login) node of the SLURM cluster, active your virtual environment and navigate to the correct
    directory, for example:
 
 ```bash
 source /work/dlclarge2/purucker-tabarena/venvs/tabarena_beta/bin/activate && cd /work/dlclarge2/purucker-tabarena/code/tabarena_benchmarking_examples/tabflow_slurm
 ```
 
-5. Run `run_setup_slurm_jobs.py` to set up all data needed to run array jobs and submit the array job to the slurm
+4. Run `run_setup_slurm_jobs.py` to set up all data needed to run array jobs and submit the array job to the slurm
    cluster by following the printed instructions. 

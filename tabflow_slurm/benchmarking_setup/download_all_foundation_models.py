@@ -13,6 +13,9 @@ if __name__ == "__main__":
     TabICLClassifier(
         checkpoint_version="tabicl-classifier-v1.1-0506.ckpt"
     )._load_model()
+    TabICLClassifier(
+        checkpoint_version="tabicl-classifier-v1-0208.ckpt"
+    )._load_model()
 
     # TabDPT
     TabDPTModel._download_and_get_model_path()
