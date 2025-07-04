@@ -276,10 +276,18 @@ class BenchmarkSetup:
 
         experiments_lst = []
         print(
-            "Generating experiments for the following models and number of configurations:",
-            self.models,
+            "Generating experiments for models...",
+            f"\n\t`all` := number of configs: {self.n_random_configs}",
+            f"\n\t{len(self.models)} models: {self.models}",
         )
         for model_name, n_configs in self.models:
+            if isinstance(n_configs, str) and n_configs == "all":
+                n_configs = self.n_random_configs
+            elif not isinstance(n_configs, int):
+                raise ValueError(
+                    f"Invalid number of configurations for model {model_name}: {n_configs}. "
+                    "Must be an integer or 'all'."
+                )
             config_generator = get_configs_generator_from_name(model_name)
             experiments_lst.append(
                 config_generator.generate_all_bag_experiments(
