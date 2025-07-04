@@ -23,7 +23,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Preprocessing
 feature_generator, label_cleaner = (
     AutoMLPipelineFeatureGenerator(),
-    LabelCleaner.construct(problem_type="binary", y=y),
+    LabelCleaner.construct(problem_type="binary", y=y_train),
 )
 X_train, y_train = (
     feature_generator.fit_transform(X_train),
@@ -32,7 +32,7 @@ X_train, y_train = (
 X_test, y_test = feature_generator.transform(X_test), label_cleaner.transform(y_test)
 
 # Train TabArena Model
-clf = RealMLPModel()
+clf = RealMLPModel(problem_type="binary")
 clf.fit(X=X_train, y=y_train)
 
 # Predict and score
