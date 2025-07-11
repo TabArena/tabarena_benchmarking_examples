@@ -36,6 +36,7 @@ def ray_map_list(
     output_handler: callable | None = None,
     track_progress: bool = False,
     tqdm_kwargs: dict | None = None,
+    ray_remote_kwargs: dict | None = None,
 ) -> list:
     """Map a function over a list using ray. Blocks until all functions are done.
 
@@ -69,6 +70,8 @@ def ray_map_list(
     """
     assert num_workers > 0, "Number of workers must be at least 1!"
     remote_kwargs = deepcopy(DEFAULT_REMOTE_KWARGS)
+    if ray_remote_kwargs is not None:
+        remote_kwargs.update(ray_remote_kwargs)
     remote_kwargs["max_calls"] = max(len(list_to_map) // num_workers, 1)
     remote_p = ray.remote(**DEFAULT_REMOTE_KWARGS)(func)
     remote_p_options = {
