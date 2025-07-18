@@ -1,10 +1,11 @@
 # TabArena Benchmarking Examples
 
-This repository contains examples for benchmarking predictive machine learning models with TabArena.
+This repository contains examples for benchmarking predictive machine learning models 
+with TabArena and using its ecosystem.
 
 ## Content Overview
 
-* `./tabarena_minimal_example/` - contains a minimal example of how to use TabArena for benchmarking.
+* `./tabarena_minimal_example/` - contains minimal examples for using TabArena.
 * `./tabflow_slurm/` - contains code for benchmarking with TabArena on a SLURM cluster.
 
 ## Download Benchmarking Examples Repo
