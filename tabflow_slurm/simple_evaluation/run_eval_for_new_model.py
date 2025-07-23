@@ -20,6 +20,7 @@ def run_eval_for_new_model(
             If None, defaults to a predefined path.
         fig_output_dir: Path to the directory where evaluation artifacts will be saved.
         method: Name of the custom method to be evaluated.
+            This is the `ag_name` key in the method class.
         subset: Optional subset of the TabArena dataset to evaluate on.
         cache: If True, caches the results and metadata to avoid recomputation.
         cache_path: Optional path to the cache directory on the filesystem.
@@ -31,13 +32,18 @@ def run_eval_for_new_model(
 
         os.environ["TABARENA_CACHE"] = cache_path
 
-    from tabrepo.nips2025_utils.end_to_end import create_and_cache_end_to_end_results, EndToEndResults
+    from tabrepo.nips2025_utils.end_to_end import EndToEnd, EndToEndResults
 
     if cache:
-        create_and_cache_end_to_end_results(path_raw=path_raw)
+        _ = EndToEnd.from_path_raw(path_raw=path_raw)
+
+        # from tabrepo.nips2025_utils.end_to_end import create_and_cache_end_to_end_results
+        # create_and_cache_end_to_end_results(path_raw=path_raw)
     end_to_end_results = EndToEndResults.from_cache(method=method)
     leaderboard = end_to_end_results.compare_on_tabarena(
-        output_dir=fig_output_dir, subset=subset, new_result_prefix=new_result_prefix,
+        output_dir=fig_output_dir,
+        subset=subset,
+        new_result_prefix=new_result_prefix,
     )
     print(leaderboard)
 
@@ -47,9 +53,10 @@ if __name__ == "__main__":
     for result_data in [
         # {
         #     "method": "BetaTabPFN",
-        #     "path_raw": "/work/dlclarge2/purucker-tabarena/output/beta_tabpfn/data",
+        #     "path_raw": "/work/dlclarge2/purucker-tabarena/output/beta_tabpfn_rerun/data",
         #     "fig_output_dir": base_output_dir / "beta_tabpfn",
         #     "subset": "classification",
+        #     "cache": False,
         # },
         # {
         #     "method": "TabFlex",
@@ -68,13 +75,20 @@ if __name__ == "__main__":
         #     "fig_output_dir": base_output_dir / "tabicl",
         #     "subset": "TabICL",
         # },
+        # {
+        #     "method": "ExplainableBM",
+        #     "path_raw": "/work/dlclarge2/purucker-tabarena/output/ebm_30062025/data",
+        #     "fig_output_dir": base_output_dir / "ebm_30062025",
+        #     "new_result_prefix": "[NEW]",
+        #     "cache": True,
+        #     "subset": "classification",
+        # },
         {
-            "method": "ExplainableBM",
-            "path_raw": "/work/dlclarge2/purucker-tabarena/output/ebm_30062025/data",
-            "fig_output_dir": base_output_dir / "ebm_30062025",
-            "new_result_prefix": "[NEW]",
+            "method": "boosted_dpdt",
+            "path_raw": "/work/dlclarge2/purucker-tabarena/output/bdpdt/data",
+            "fig_output_dir": base_output_dir / "bdpdt",
+            "subset": ["classification", "lite"],
             "cache": True,
-            "subset": "classification",
         },
     ]:
         run_eval_for_new_model(
