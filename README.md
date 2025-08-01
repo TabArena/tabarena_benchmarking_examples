@@ -28,6 +28,10 @@ source ~/.venvs/tabarena/bin/activate
 cd external_libs
 git clone --branch main https://github.com/autogluon/tabrepo.git
 
+# Local install of AutoGluon (mostly needed for getting the latest state of the code)
+git clone --branch master https://github.com/autogluon/autogluon
+cd autogluon && ./full_install.sh && cd ..
+
 # use GIT_LFS_SKIP_SMUDGE=1 in front of the command if installing TabDPT fails due to a broken LFS/pip setup
 GIT_LFS_SKIP_SMUDGE=1 uv pip install -e tabrepo/[benchmark]
 
