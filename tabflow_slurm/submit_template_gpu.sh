@@ -22,7 +22,8 @@ if ! command -v jq &> /dev/null; then
 fi
 
 # File path to JSON
-JSON_FILE="slurm_run_data.json"
+JSON_FILE=${1:?Error: JSON file argument is required}
+echo "Using JSON file: $JSON_FILE"
 # Select job index from arguments
 J=${SLURM_ARRAY_TASK_ID}  # Default to index 0 if not provided
 echo "Selected Job Index: $J"
