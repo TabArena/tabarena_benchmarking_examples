@@ -275,6 +275,8 @@ class BenchmarkSetup:
         jobs_to_check = list(yield_all_jobs())
 
         # Check cache and filter invalid jobs in parallel using Ray
+        if ray.is_initialized:
+            ray.shutdown()
         ray.init(num_cpus=self.num_ray_cpus)
         output = ray_map_list(
             list_to_map=list(to_batch_list(jobs_to_check, 10_000)),
@@ -408,8 +410,12 @@ class BenchmarkSetup:
         with open(self.slurm_job_json, "w") as f:
             json.dump(jobs_dict, f)
 
-        print("Run the following command to start the jobs:")
-        print(f"sbatch --array=0-{n_jobs - 1}%100 -- {self.slurm_script}")
+        print(
+            f"##### Setup Jobs for {self.benchmark_name}"
+            "\nRun the following command to start the jobs:"
+            f"\nsbatch --array=0-{n_jobs - 1}%100 {self.slurm_script} {self.slurm_job_json}"
+            "\n"
+        )
 
 
 def should_run_job_batch(*, input_data_list: list[dict], **kwargs) -> list[bool]:
