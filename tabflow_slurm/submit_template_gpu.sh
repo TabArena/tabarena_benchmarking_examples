@@ -3,6 +3,7 @@
 #SBATCH --mem=32G
 #SBATCH --time=6:00:00
 #SBATCH --cpus-per-task=8
+#SBATCH --ntasks=1
 #SBATCH --job-name=tabarena_gpu_run
 #SBATCH --export=ALL
 #SBATCH --gres=gpu:1,localtmp:100

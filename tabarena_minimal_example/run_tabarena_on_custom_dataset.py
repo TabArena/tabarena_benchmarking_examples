@@ -50,12 +50,13 @@ def get_custom_classification_task() -> UserTask:
         n_repeats=n_repeats, n_splits=n_splits, random_state=42
     ).split(X=dataset.drop(columns=["target"]), y=dataset["target"])
     # Transform the splits into a standard dictionary format expected by TabArena
-    splits = {
-        split_i // n_repeats: {
-            split_i % n_splits: (train_idx.tolist(), test_idx.tolist())
-        }
-        for split_i, (train_idx, test_idx) in enumerate(sklearn_splits)
-    }
+    splits = {}
+    for split_i, (train_idx, test_idx) in enumerate(sklearn_splits):
+        repeat_i = split_i // n_repeats
+        fold_i = split_i % n_repeats
+        if repeat_i not in splits:
+            splits[repeat_i] = {}
+        splits[repeat_i][fold_i] = (train_idx.tolist(), test_idx.tolist())
 
     return UserTask(
         task_name="ToyClf",

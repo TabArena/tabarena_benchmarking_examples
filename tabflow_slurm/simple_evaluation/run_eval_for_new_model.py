@@ -52,7 +52,7 @@ def run_eval_for_new_models(
 
                 create_and_cache_end_to_end_results(
                     path_raw=model.path_raw / "data",
-                    num_cpus=32,
+                    num_cpus=8,
                     artifact_name=model.new_result_prefix,
                 )
             except:
@@ -83,30 +83,43 @@ if __name__ == "__main__":
     fig_dir = Path(__file__).parent / "evals"
     out_dir = Path("/work/dlclarge2/purucker-tabarena/output")
 
-    # Eval for model seed experiment
+    # # ------------ Eval for model seed experiment
+    # run_eval_for_new_models(
+    #     [
+    #         ModelMetadata(
+    #             path_raw=out_dir / "realmlp_0108_seed_static",
+    #             method="RealMLP",
+    #             new_result_prefix="STATIC",
+    #         ),
+    #         ModelMetadata(
+    #             path_raw=out_dir / "realmlp_0108_seed_fw",
+    #             method="RealMLP",
+    #             new_result_prefix="FOLD-WISE",
+    #         ),
+    #         ModelMetadata(
+    #             path_raw=out_dir / "realmlp_0108_seed_fcw",
+    #             method="RealMLP",
+    #             new_result_prefix="FOLD-CONFIG-WISE",
+    #         ),
+    #     ],
+    #     fig_output_dir=fig_dir / "model_seed_experiment",
+    #     cache_path="/work/dlclarge2/purucker-tabarena/output/tabarena_cache",
+    #     subset=["lite"],
+    # )
+    # # Takeaway: use fold-config-wise.
+
+    # ------------ EBM New Search Space and Memory Estimation
     run_eval_for_new_models(
         [
             ModelMetadata(
-                path_raw=out_dir / "realmlp_0108_seed_static",
-                method="RealMLP",
-                new_result_prefix="STATIC",
-            ),
-            ModelMetadata(
-                path_raw=out_dir / "realmlp_0108_seed_fw",
-                method="RealMLP",
-                new_result_prefix="FOLD-WISE",
-            ),
-            ModelMetadata(
-                path_raw=out_dir / "realmlp_0108_seed_fcw",
-                method="RealMLP",
-                new_result_prefix="FOLD-CONFIG-WISE",
+                path_raw=out_dir / "ebm_03082025",
+                method="ExplainableBM",
+                new_result_prefix="RERUN",
             ),
         ],
-        fig_output_dir=fig_dir / "model_seed_experiment",
+        fig_output_dir=fig_dir / "ebm_03082025",
         cache_path="/work/dlclarge2/purucker-tabarena/output/tabarena_cache",
-        subset=["lite"],
     )
-
 
     # --- Old eval
     # for result_data in [
