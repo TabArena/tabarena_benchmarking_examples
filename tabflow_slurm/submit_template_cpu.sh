@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --partition=alldlc2_gpu-l40s
+#SBATCH --partition=bosch_cpu-cascadelake
 #SBATCH --mem=32G
 #SBATCH --time=6:00:00
 #SBATCH --cpus-per-task=8
 #SBATCH --ntasks=1
-#SBATCH --job-name=tabarena_gpu_run
+#SBATCH --job-name=tabarena_cpu_run
 #SBATCH --export=ALL
-#SBATCH --gres=gpu:1,localtmp:100
+#SBATCH --gres=localtmp:100
 #SBATCH --propagate=NONE
 #SBATCH -o /work/dlclarge2/purucker-tabarena/slurm_out/new_models/%A/slurm-%A_%a.out
 #SBATCH -e /work/dlclarge2/purucker-tabarena/slurm_out/new_models/%A/slurm-%A_%a.out
