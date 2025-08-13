@@ -52,8 +52,8 @@ def get_custom_classification_task() -> UserTask:
     # Transform the splits into a standard dictionary format expected by TabArena
     splits = {}
     for split_i, (train_idx, test_idx) in enumerate(sklearn_splits):
-        repeat_i = split_i // n_repeats
-        fold_i = split_i % n_repeats
+        repeat_i = split_i // n_splits
+        fold_i = split_i % n_splits
         if repeat_i not in splits:
             splits[repeat_i] = {}
         splits[repeat_i][fold_i] = (train_idx.tolist(), test_idx.tolist())
