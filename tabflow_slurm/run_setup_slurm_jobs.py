@@ -1,4 +1,4 @@
-"""Code to use pre-defined benchmark enviroment and setup slurm jobs for (parallel) scheduling."""
+"""Code to use pre-defined benchmark environment and setup slurm jobs for (parallel) scheduling."""
 
 from __future__ import annotations
 

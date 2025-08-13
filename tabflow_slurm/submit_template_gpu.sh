@@ -62,18 +62,15 @@ CONFIG_INDEX=$(jq -r --argjson J "$J" '.jobs[$J].config_index | join(",")' "$JSO
 TASK_ID=$(jq -r --argjson J "$J" '.jobs[$J].task_id' "$JSON_FILE")
 FOLD=$(jq -r --argjson J "$J" '.jobs[$J].fold' "$JSON_FILE")
 REPEAT=$(jq -r --argjson J "$J" '.jobs[$J].repeat' "$JSON_FILE")
-DATASET_NAME=$(jq -r --argjson J "$J" '.jobs[$J].dataset_name' "$JSON_FILE")
 
 # Output extracted values
 echo "CONFIG_INDEX: $CONFIG_INDEX"
 echo "Task ID: TASK_ID"
 echo "Fold: $FOLD"
 echo "Repeat: $REPEAT"
-echo "Dataset Name: $DATASET_NAME"
 
 $PYTHON_PATH $RUNSCRIPT \
     --task_id $TASK_ID \
-    --dataset_name $DATASET_NAME \
     --fold $FOLD \
     --repeat $REPEAT \
     --config_index $CONFIG_INDEX \
