@@ -13,13 +13,12 @@ from tabrepo.benchmark.task import UserTask
 
 REPO_DIR = str(Path(__file__).parent / "repos" / "custom_dataset")
 """Cache location for the aggregated results."""
-
 TABARENA_DIR = str(Path(__file__).parent / "tabarena_out" / "custom_dataset")
 """Output directory for saving the results and result artifacts from TabArena."""
-
 EVAL_DIR = str(Path(__file__).parent / "evals" / "custom_dataset")
 """Output for artefacts from the evaluation results of the custom model."""
-
+TASK_CACHE_DIR = str(Path(__file__).parent / "task_cache")
+"""Cache location for the local OpenML tasks created from the custom dataset."""
 
 def get_custom_classification_task() -> UserTask:
     """Example for defining a custom classification task/dataset to run with for TabArena."""
@@ -58,13 +57,19 @@ def get_custom_classification_task() -> UserTask:
             splits[repeat_i] = {}
         splits[repeat_i][fold_i] = (train_idx.tolist(), test_idx.tolist())
 
-    return UserTask(
+
+    user_task = UserTask(
         task_name="ToyClf",
+        task_cache_path=Path(TASK_CACHE_DIR),
+    )
+    oml_task = user_task.create_local_openml_task(
         dataset=dataset,
         target_feature="target",
         problem_type="classification",
         splits=splits,
     )
+    user_task.save_local_openml_task(oml_task)
+    return user_task
 
 
 def get_custom_regression_task() -> UserTask:
@@ -95,14 +100,18 @@ def get_custom_regression_task() -> UserTask:
     # Transform the splits into a standard dictionary format expected by TabArena
     splits = {0: {0: (train_idx, test_idx)}}
 
-    return UserTask(
+    user_task = UserTask(
         task_name="ToyReg",
+        task_cache_path=Path(TASK_CACHE_DIR),
+    )
+    oml_task = user_task.create_local_openml_task(
         dataset=dataset,
         target_feature="target",
         problem_type="regression",
         splits=splits,
     )
-
+    user_task.save_local_openml_task(oml_task)
+    return user_task
 
 def get_model_configs_to_benchmark(
     model_names: list[str] | None,
