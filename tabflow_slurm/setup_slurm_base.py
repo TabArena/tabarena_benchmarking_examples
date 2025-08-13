@@ -62,7 +62,7 @@ class BenchmarkSetup:
     slurm_script_cpu: str = "submit_template_cpu.sh"
     """Name of the CPU SLURM (array) script that to run on the cluster (only used to print the command
      to run)."""
-    slurm_script_gpu: str = "submit_template_Gpu.sh"
+    slurm_script_gpu: str = "submit_template_gpu.sh"
     """Name of the GPU SLURM (array) script that to run on the cluster (only used to print the command
      to run)."""
     slurm_log_output_from_base_path: str = "slurm_out/new_models"
@@ -124,7 +124,7 @@ class BenchmarkSetup:
             ("TabDPT", 0, "static"),
             ("TabICL", "all", "static"),
             ("TabPFNv2", "all", "static"),
-            # TODO: add Mitra here and to utils
+            ("Mitra", "all", "fold-config-wise"),
             # -- Neural networks
             ("RealMLP", "all", "static"),
             ("ModernNCA", "all", "static"),
@@ -134,7 +134,7 @@ class BenchmarkSetup:
             ("BoostedDPDT", "all", "static"),
             ("PerpetualBoosting", 0, "static"),
             ("CatBoost", "all", "static"),
-            ("EBM", "all", "static"),
+            ("EBM", "all", "fold-config-wise"),
             ("ExtraTrees", "all", "static"),
             ("LightGBM", "all", "static"),
             ("RandomForest", "all", "static"),
@@ -417,6 +417,24 @@ class BenchmarkSetup:
             "\n"
         )
 
+    @staticmethod
+    def models_for_tabpfnv2_subset() -> list[str]:
+        """Models within TabPFNv2 constraints.
+
+        - <=10k training samples
+        - <=500 features
+        - <=10 classes
+        """
+        return ["TabPFNV2Model", "MitraModel"]
+
+    @staticmethod
+    def models_for_tabicl_subset() -> list[str]:
+        """Models within TabICL constraints.
+
+        - <=10k training samples
+        - <=500 features
+        """
+        return ["TabICLModel"]
 
 def should_run_job_batch(*, input_data_list: list[dict], **kwargs) -> list[bool]:
     """Batched version for Ray."""
@@ -444,10 +462,10 @@ def should_run_job(
     # Filter out-of-constraints datasets
     if (
         # Skip TabICL if the dataset cannot run it
-        ((config["model_cls"] == "TabICLModel") and (not can_run_tabicl))
+        ((config["model_cls"] in BenchmarkSetup.models_for_tabicl_subset()) and (not can_run_tabicl))
         # Skip TabPFN if the dataset cannot run it
         or (
-            (config["model_cls"] in ["TabPFNV2Model", "MitraModel"])
+            (config["model_cls"] in BenchmarkSetup.models_for_tabpfnv2_subset())
             and (not can_run_tabpfnv2)
         )
     ):

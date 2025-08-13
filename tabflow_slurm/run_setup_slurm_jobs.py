@@ -4,6 +4,20 @@ from __future__ import annotations
 
 from tabflow_slurm.setup_slurm_base import BenchmarkSetup
 
+# # --- Mitra Run (12/08/2025).
+# # Several jobs were stopped because of too conservative memory estimation, re-ran with 64GB RAM.
+# BenchmarkSetup(
+#     benchmark_name="mitra_12082025",
+#     models=[
+#         ("Mitra", 0, "fold-config-wise"),
+#     ],
+#     # memory_limit=64,
+#     num_gpus=1,
+#     methods_per_job=5,
+#     sequential_local_fold_fitting=True,
+#     setup_ray_for_slurm_shared_resources_environment=False,
+# ).setup_jobs()
+
 # # --- Test which setup to use for future TabArena runs.
 # BenchmarkSetup(
 #     benchmark_name="realmlp_0108_seed_fcw",

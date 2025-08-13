@@ -6,6 +6,7 @@
 #SBATCH --ntasks=1
 #SBATCH --job-name=tabarena_gpu_run
 #SBATCH --export=ALL
+#SBATCH --requeue
 #SBATCH --gres=gpu:1,localtmp:100
 #SBATCH --propagate=NONE
 #SBATCH -o /work/dlclarge2/purucker-tabarena/slurm_out/new_models/%A/slurm-%A_%a.out
