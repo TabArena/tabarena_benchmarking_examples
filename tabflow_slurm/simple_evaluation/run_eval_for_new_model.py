@@ -83,6 +83,19 @@ if __name__ == "__main__":
     fig_dir = Path(__file__).parent / "evals"
     out_dir = Path("/work/dlclarge2/purucker-tabarena/output")
 
+    # ------------ Mitra
+    run_eval_for_new_models(
+        [
+            ModelMetadata(
+                path_raw=out_dir / "mitra_12082025",
+                method="Mitra",
+            ),
+        ],
+        fig_output_dir=fig_dir / "mitra_12082025",
+        cache_path="/work/dlclarge2/purucker-tabarena/output/tabarena_cache",
+        subset="tabpfn",
+    )
+
     # # ------------ Eval for model seed experiment
     # run_eval_for_new_models(
     #     [
@@ -108,18 +121,18 @@ if __name__ == "__main__":
     # )
     # # Takeaway: use fold-config-wise.
 
-    # ------------ EBM New Search Space and Memory Estimation
-    run_eval_for_new_models(
-        [
-            ModelMetadata(
-                path_raw=out_dir / "ebm_03082025",
-                method="ExplainableBM",
-                new_result_prefix="RERUN",
-            ),
-        ],
-        fig_output_dir=fig_dir / "ebm_03082025",
-        cache_path="/work/dlclarge2/purucker-tabarena/output/tabarena_cache",
-    )
+    # # ------------ EBM New Search Space and Memory Estimation
+    # run_eval_for_new_models(
+    #     [
+    #         ModelMetadata(
+    #             path_raw=out_dir / "ebm_03082025",
+    #             method="ExplainableBM",
+    #             new_result_prefix="RERUN",
+    #         ),
+    #     ],
+    #     fig_output_dir=fig_dir / "ebm_03082025",
+    #     cache_path="/work/dlclarge2/purucker-tabarena/output/tabarena_cache",
+    # )
 
     # --- Old eval
     # for result_data in [

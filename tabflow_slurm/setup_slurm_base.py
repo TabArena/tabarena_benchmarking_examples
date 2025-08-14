@@ -9,6 +9,7 @@ See `run_setup_slurm_jobs.py` for an example of how to use this code.
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from dataclasses import dataclass, field
 from itertools import product
 from pathlib import Path
@@ -44,9 +45,6 @@ class BenchmarkSetup:
             - slurm_out         -- contains all SLURM output logs
             - .openml-cache     -- contains the OpenML cache
     """
-    metadata_from_base_path: str = "code/tabarena_benchmarking_examples/tabflow_slurm/tabarena_dataset_metadata.csv"
-    """Dataset/task Metadata for TabArena, download this csv from: https://github.com/TabArena/dataset_curation/blob/main/dataset_creation_scripts/metadata/tabarena_dataset_metadata.csv
-    Adjust as needed to run less datasets/tasks or create a new constraint used for filtering."""
     python_from_base_path: str = "venvs/tabarena_ag14/bin/python"
     """Python executable and environment to use for the SLURM jobs. This should point to a Python
     executable within a (virtual) environment."""
@@ -62,7 +60,7 @@ class BenchmarkSetup:
     slurm_script_cpu: str = "submit_template_cpu.sh"
     """Name of the CPU SLURM (array) script that to run on the cluster (only used to print the command
      to run)."""
-    slurm_script_gpu: str = "submit_template_Gpu.sh"
+    slurm_script_gpu: str = "submit_template_gpu.sh"
     """Name of the GPU SLURM (array) script that to run on the cluster (only used to print the command
      to run)."""
     slurm_log_output_from_base_path: str = "slurm_out/new_models"
@@ -77,8 +75,28 @@ class BenchmarkSetup:
     File path is f"{self.base_path}{self.configs_path_from_base_path}{self.benchmark_name}.yaml"
     """
 
-    # Benchmark Settings
-    # ------------------
+    # Task/Data Settings
+    metadata_from_base_path: str = "code/tabarena_benchmarking_examples/tabflow_slurm/tabarena_dataset_metadata.csv"
+    """Dataset/task Metadata for TabArena, download this csv from: https://github.com/TabArena/dataset_curation/blob/main/dataset_creation_scripts/metadata/tabarena_dataset_metadata.csv
+    Adjust as needed to run less datasets/tasks or create a new constraint used for filtering."""
+    custom_metadata: pd.DataFrame | None = None
+    """Custom metadata to use for defining the tasks and datasets to run.
+
+    The metadata must have the following columns:
+        "tabarena_num_repeats": int
+            The number of repeats for the task.
+        "num_folds": int
+            The number of folds for the task.
+        "task_id": str
+            The task ID for the task as an int.
+            If a local task, we assume this to be `UserTask.task_id_str`.
+        "can_run_tabicl": bool
+            If the task can run TabICL. (<=100k training samples, <=500 features)
+        "can_run_tabpfnv2" : bool
+            If the task can run TabPFNv2. (<=10k training samples, <=500 features, <=10 classes)
+        "problem_type": str
+            The problem type of the task. Options: "binary", "regression", "multiclass"
+    """
     tabarena_lite: bool = False
     """Run only TabArena-Lite, that is: only the first split of each dataset, and the default
     configuration and up to `tabarena_lite_n_configs` random configs."""
@@ -90,6 +108,8 @@ class BenchmarkSetup:
             "regression",
         ]
     )
+    # Benchmark Settings
+    # ------------------
     """Problem types to run in the benchmark. Adjust as needed to run only specific problem types."""
     num_cpus: int = 8
     """Number of CPUs to use for the SLURM jobs. The number of CPUs available on the node and in
@@ -119,22 +139,19 @@ class BenchmarkSetup:
     Options from the current state of TabArena are:
     default_factory=lambda: [
             # -- TFMs (or similar)
-            ("TabFlex", 0, "static"),
-            ("BETA", 0, "static"),
             ("TabDPT", 0, "static"),
             ("TabICL", "all", "static"),
             ("TabPFNv2", "all", "static"),
-            # TODO: add Mitra here and to utils
+            ("Mitra", "all", "fold-config-wise"),
             # -- Neural networks
+            ("TabM", "all", "static"),
             ("RealMLP", "all", "static"),
             ("ModernNCA", "all", "static"),
             ("FastaiMLP", "all", "static"),
             ("TorchMLP", "all", "static"),
             # -- Tree-based models
-            ("BoostedDPDT", "all", "static"),
-            ("PerpetualBoosting", 0, "static"),
             ("CatBoost", "all", "static"),
-            ("EBM", "all", "static"),
+            ("EBM", "all", "fold-config-wise"),
             ("ExtraTrees", "all", "static"),
             ("LightGBM", "all", "static"),
             ("RandomForest", "all", "static"),
@@ -148,9 +165,6 @@ class BenchmarkSetup:
     methods_per_job: int = 5
     """Batching of several experiments per job. This is used to reduce the number of SLURM jobs.
     Adjust the time limit in the slurm_script accordingly."""
-    sequential_local_fold_fitting: bool = False
-    """Use Ray for local fold fitting. This is used to speed up the local fold fitting. For CPU
-    runs, or if multiple GPUs are available, this should be set to False"""
     setup_ray_for_slurm_shared_resources_environment: bool = True
     """Prepare Ray for a SLURM shared resource environment. This is used to setup Ray for SLURM
     shared resources. Recommended to set to True if sequential_local_fold_fitting is False."""
@@ -171,6 +185,11 @@ class BenchmarkSetup:
     num_ray_cpus = 8
     """Number of CPUs to use for checking the cache and generating the jobs. This should be set to the number of CPUs
     available to the python script."""
+    sequential_local_fold_fitting: bool = False
+    """Use Ray for local fold fitting. This is used to speed up the local fold fitting and force
+    this behavior if True. If False the default strategy of running the local fold fitting is used,
+    as determined by AutoGluon and the model's default_ag_args_ensemble parameters. Should only be used for
+    debugging anymore."""
 
     @property
     def slurm_job_json(self) -> str:
@@ -222,9 +241,8 @@ class BenchmarkSetup:
     @property
     def slurm_script(self) -> str:
         """SLURM script to run the benchmark."""
-        if self.num_gpus > 0:
-            return self.slurm_script_gpu
-        return self.slurm_script_cpu
+        script = self.slurm_script_gpu if self.num_gpus > 0 else self.slurm_script_cpu
+        return str(Path(__file__).parent / script)
 
     def get_jobs_to_run(self):  # noqa: C901
         """Determine all jobs to run by checking the cache and filtering
@@ -235,7 +253,10 @@ class BenchmarkSetup:
         Path(self.output_dir).mkdir(parents=True, exist_ok=True)
         Path(self.slurm_log_output).mkdir(parents=True, exist_ok=True)
 
-        metadata = pd.read_csv(self.metadata)
+        if self.custom_metadata is not None:
+            metadata = deepcopy(self.custom_metadata)
+        else:
+            metadata = pd.read_csv(self.metadata)
 
         self.generate_configs_yaml()
         # Read YAML file and get the number of configs
@@ -255,7 +276,6 @@ class BenchmarkSetup:
                         task_id = row.task_id
                         can_run_tabicl = row.can_run_tabicl
                         can_run_tabpfnv2 = row.can_run_tabpfnv2
-                        dataset_name = row.dataset_name
 
                         # Quick, model independent skip.
                         if row.problem_type not in self.problem_types_to_run:
@@ -267,7 +287,6 @@ class BenchmarkSetup:
                             "task_id": task_id,
                             "fold_i": fold_i,
                             "repeat_i": repeat_i,
-                            "dataset_name": dataset_name,
                             "can_run_tabicl": can_run_tabicl,
                             "can_run_tabpfnv2": can_run_tabpfnv2,
                         }
@@ -300,7 +319,6 @@ class BenchmarkSetup:
         for run_job, job_data in zip(output, jobs_to_check, strict=True):
             if run_job:
                 job_key = (
-                    job_data["dataset_name"],
                     job_data["task_id"],
                     job_data["fold_i"],
                     job_data["repeat_i"],
@@ -317,10 +335,9 @@ class BenchmarkSetup:
             for config_batch in to_batch_list(config_indices, self.methods_per_job):
                 jobs.append(
                     {
-                        "dataset_name": job_key[0],
-                        "task_id": job_key[1],
-                        "fold": job_key[2],
-                        "repeat": job_key[3],
+                        "task_id": job_key[0],
+                        "fold": job_key[1],
+                        "repeat": job_key[2],
                         "config_index": config_batch,
                     },
                 )
@@ -417,6 +434,25 @@ class BenchmarkSetup:
             "\n"
         )
 
+    @staticmethod
+    def models_for_tabpfnv2_subset() -> list[str]:
+        """Models within TabPFNv2 constraints.
+
+        - <=10k training samples
+        - <=500 features
+        - <=10 classes
+        """
+        return ["TabPFNV2Model", "MitraModel"]
+
+    @staticmethod
+    def models_for_tabicl_subset() -> list[str]:
+        """Models within TabICL constraints.
+
+        - <=10k training samples
+        - <=500 features
+        """
+        return ["TabICLModel"]
+
 
 def should_run_job_batch(*, input_data_list: list[dict], **kwargs) -> list[bool]:
     """Batched version for Ray."""
@@ -444,10 +480,13 @@ def should_run_job(
     # Filter out-of-constraints datasets
     if (
         # Skip TabICL if the dataset cannot run it
-        ((config["model_cls"] == "TabICLModel") and (not can_run_tabicl))
+        (
+            (config["model_cls"] in BenchmarkSetup.models_for_tabicl_subset())
+            and (not can_run_tabicl)
+        )
         # Skip TabPFN if the dataset cannot run it
         or (
-            (config["model_cls"] in ["TabPFNV2Model", "MitraModel"])
+            (config["model_cls"] in BenchmarkSetup.models_for_tabpfnv2_subset())
             and (not can_run_tabpfnv2)
         )
     ):

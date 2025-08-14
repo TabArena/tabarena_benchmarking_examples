@@ -66,8 +66,7 @@ def setup_slurm_job(
 
 def run_experiment(
     *,
-    task_id: int,
-    dataset_name: str,
+    task_id: str,
     fold: int,
     repeat: int,
     configs_yaml_file: str,
@@ -83,10 +82,10 @@ def run_experiment(
 
     Parameters
     ----------
-    task_id : int
+    task_id : str
         The task id of the OpenML task to run.
-    dataset_name : str
-        The name of the dataset to run.
+        If castable into int, it is assumed to be an OpenML task ID.
+        If str, it defines a local OpenML task file.
     fold : int
         The fold to run.
     repeat : int
@@ -110,13 +109,19 @@ def run_experiment(
         Whether to use sequential local fold fitting or not. If True, the experiment will be run without
         Ray. This might create a large speedup for some models.
     """
-    from tabrepo.benchmark.experiment import run_experiments
-    from tabrepo.benchmark.experiment.experiment_constructor import YamlExperimentSerializer
-    from tabrepo.utils.cache import CacheFunctionPickle
+    from tabrepo.benchmark.experiment import run_experiments_new
+    from tabrepo.benchmark.experiment.experiment_constructor import (
+        YamlExperimentSerializer,
+    )
 
-    task_metadata = {task_id: dataset_name}
+    try:
+        task_id_or_object = int(task_id)
+    except ValueError:
+        from tabrepo.benchmark.task.user_task import UserTask
+
+        task_id_or_object = UserTask.from_task_id_str(task_id)
+
     yaml_out = YamlExperimentSerializer.load_yaml(path=configs_yaml_file)
-
     methods = []
     for m_i, method in enumerate(yaml_out):
         if (config_index is not None) and (m_i not in config_index):
@@ -134,7 +139,9 @@ def run_experiment(
         if "ag_args_fit" not in method["model_hyperparameters"]:
             method["model_hyperparameters"]["ag_args_fit"] = {}
         # Default to 1 GPU per fit if multiple GPUs are available
-        method["model_hyperparameters"]["ag_args_fit"]["num_gpus"] = 1 if num_gpus > 0 else 0
+        method["model_hyperparameters"]["ag_args_fit"]["num_gpus"] = (
+            1 if num_gpus > 0 else 0
+        )
         if num_gpus == 1:
             # In this case, we can use all CPUs for fitting, as we have only one GPU for fitting anyhow.
             method["model_hyperparameters"]["ag_args_fit"]["num_cpus"] = num_cpus
@@ -142,27 +149,19 @@ def run_experiment(
         if sequential_local_fold_fitting:
             if "ag_args_ensemble" not in method["model_hyperparameters"]:
                 method["model_hyperparameters"]["ag_args_ensemble"] = {}
-            method["model_hyperparameters"]["ag_args_ensemble"]["fold_fitting_strategy"] = "sequential_local"
+            method["model_hyperparameters"]["ag_args_ensemble"][
+                "fold_fitting_strategy"
+            ] = "sequential_local"
 
         methods.append(YamlExperimentSerializer.parse_method(method))
 
-    results_lst: dict[str, Any] = run_experiments(
-        expname=output_dir,
-        repeat_fold_pairs=[(repeat, fold)],
-        tids=[task_id],
-        folds=None,
-        repeats=None,
-        methods=methods,
-        task_metadata=task_metadata,
-        ignore_cache=ignore_cache,
-        cache_cls=CacheFunctionPickle,
-        cache_cls_kwargs={"include_self_in_call": True},
-        cache_path_format="name_first",
-        mode="local",
-        s3_bucket=None,
-        only_cache=False,
-        raise_on_failure=True,
-        debug_mode=False,
+    results_lst: dict[str, Any] = run_experiments_new(
+        output_dir=output_dir,
+        model_experiments=methods,
+        tasks=[task_id_or_object],
+        repetitions_mode="individual",
+        repetitions_mode_args=[(fold, repeat)],
+        cache_mode="ignore" if ignore_cache else "default",
     )[0]
     print("Metric error:", results_lst["metric_error"])
     return results_lst
@@ -185,8 +184,9 @@ def parse_int_list(s):
 if __name__ == "__main__":
     # TODO: provide defaults or a default CLI command to run this.
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task_id", type=int, required=True, help="OpenML Task ID for the task to run.")
-    parser.add_argument("--dataset_name", type=str, required=True, help="Name of the dataset to run.")
+    parser.add_argument(
+        "--task_id", type=str, required=True, help="OpenML Task ID for the task to run."
+    )
     parser.add_argument("--fold", type=int, required=True, help="Fold of CV to run.")
     parser.add_argument(
         "--repeat",
@@ -208,12 +208,26 @@ if __name__ == "__main__":
     )
 
     # TODO: improve usage, but required for a good setup
-    parser.add_argument("--openml_cache_dir", type=str, help="Path to the OpenML cache directory.")
-    parser.add_argument("--tabrepo_cache_dir", type=str, help="Path to the TabRepo cache directory.")
-    parser.add_argument("--output_dir", type=str, help="Path to the output directory where the results will be saved.")
-    parser.add_argument("--num_cpus", type=int, help="Number of CPUs to use for the experiment.")
-    parser.add_argument("--num_gpus", type=int, help="Number of GPUs to use for the experiment.")
-    parser.add_argument("--memory_limit", type=int, help="Memory limit to use for the experiment.")
+    parser.add_argument(
+        "--openml_cache_dir", type=str, help="Path to the OpenML cache directory."
+    )
+    parser.add_argument(
+        "--tabrepo_cache_dir", type=str, help="Path to the TabRepo cache directory."
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        help="Path to the output directory where the results will be saved.",
+    )
+    parser.add_argument(
+        "--num_cpus", type=int, help="Number of CPUs to use for the experiment."
+    )
+    parser.add_argument(
+        "--num_gpus", type=int, help="Number of GPUs to use for the experiment."
+    )
+    parser.add_argument(
+        "--memory_limit", type=int, help="Memory limit to use for the experiment."
+    )
     parser.add_argument(
         "--setup_ray_for_slurm_shared_resources_environment",
         type=str2bool,
@@ -248,7 +262,6 @@ if __name__ == "__main__":
         run_experiment(
             config_index=args.config_index,
             task_id=args.task_id,
-            dataset_name=args.dataset_name,
             fold=args.fold,
             repeat=args.repeat,
             configs_yaml_file=args.configs_yaml_file,
