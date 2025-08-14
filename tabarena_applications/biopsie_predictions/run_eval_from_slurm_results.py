@@ -96,5 +96,5 @@ def run_simple_plot():
 
 
 if __name__ == "__main__":
-    # run_example_for_evaluate_results_on_custom_dataset()
+    run_example_for_evaluate_results_on_custom_dataset()
     run_simple_plot()

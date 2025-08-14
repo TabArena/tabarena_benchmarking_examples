@@ -477,6 +477,12 @@ def should_run_job(
     can_run_tabicl = input_data["can_run_tabicl"]
     can_run_tabpfnv2 = input_data["can_run_tabpfnv2"]
 
+    # Check if local task or not
+    try:
+        task_id = int(task_id)
+    except ValueError:
+        task_id = task_id.split("|", 2)[1]  # Extract the local task ID if it is a UserTask.task_id_str
+
     # Filter out-of-constraints datasets
     if (
         # Skip TabICL if the dataset cannot run it

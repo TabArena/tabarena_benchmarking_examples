@@ -13,7 +13,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
 # Import a TabArena model
-from tabrepo.benchmark.models.ag.realmlp.realmlp_model import RealMLPModel
+from tabrepo.benchmark.models.ag.realmlp.realmlp_model import TabArenaRealMLPModel
 
 # Get Data
 X, y = load_breast_cancer(return_X_y=True, as_frame=True)
@@ -32,7 +32,7 @@ X_train, y_train = (
 X_test, y_test = feature_generator.transform(X_test), label_cleaner.transform(y_test)
 
 # Train TabArena Model
-clf = RealMLPModel(problem_type="binary")
+clf = TabArenaRealMLPModel(problem_type="binary")
 clf.fit(X=X_train, y=y_train)
 
 # Predict and score
