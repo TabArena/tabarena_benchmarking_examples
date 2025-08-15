@@ -375,6 +375,9 @@ class BenchmarkSetup:
                 config_generator.generate_all_bag_experiments(
                     num_random_configs=n_configs,
                     add_seed=seed_config,
+                    method_kwargs=dict(
+                        init_kwargs=dict(default_base_path="/tmp/ag_lop")
+                    ),
                 )
             )
 
