@@ -236,8 +236,8 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
         reg_task.tabarena_task_name,
     ]
     task_metadata["NumberOfInstances"] = [
-        len(clf_task._dataset),
-        len(reg_task._dataset),
+        len(clf_task.load_local_openml_task().get_dataset().get_data()),
+        len(reg_task.load_local_openml_task().get_dataset().get_data()),
     ]
 
     repo: EvaluationRepository = generate_repo(
