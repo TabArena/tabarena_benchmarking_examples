@@ -190,6 +190,12 @@ class BenchmarkSetup:
     this behavior if True. If False the default strategy of running the local fold fitting is used,
     as determined by AutoGluon and the model's default_ag_args_ensemble parameters. Should only be used for
     debugging anymore."""
+    model_artifacts_base_path: str | Path | None = "/tmp/ag"  # noqa: S108
+    """Adapt the default temporary directory used for model artifacts in TabArena.
+        - If None, the default temporary directory is used: "./AutoGluonModels".
+        - If a string or Path, the directory is used as the base path for the temporary
+        and any model artifacts will be stored in time-stamped subdirectories.
+    """
 
     @property
     def slurm_job_json(self) -> str:
@@ -357,6 +363,11 @@ class BenchmarkSetup:
         from tabrepo.models.utils import get_configs_generator_from_name
 
         experiments_lst = []
+        method_kwargs = {}
+        if self.model_artifacts_base_path is not None:
+            method_kwargs["init_kwargs"] = {
+                "default_base_path": self.model_artifacts_base_path
+            }
         print(
             "Generating experiments for models...",
             f"\n\t`all` := number of configs: {self.n_random_configs}",
@@ -375,9 +386,7 @@ class BenchmarkSetup:
                 config_generator.generate_all_bag_experiments(
                     num_random_configs=n_configs,
                     add_seed=seed_config,
-                    method_kwargs=dict(
-                        init_kwargs=dict(default_base_path="/tmp/ag_lop")
-                    ),
+                    method_kwargs=method_kwargs,
                 )
             )
 
@@ -484,7 +493,9 @@ def should_run_job(
     try:
         task_id = int(task_id)
     except ValueError:
-        task_id = task_id.split("|", 2)[1]  # Extract the local task ID if it is a UserTask.task_id_str
+        task_id = task_id.split("|", 2)[
+            1
+        ]  # Extract the local task ID if it is a UserTask.task_id_str
 
     # Filter out-of-constraints datasets
     if (
