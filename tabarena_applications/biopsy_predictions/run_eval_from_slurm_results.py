@@ -51,16 +51,21 @@ def run_example_for_evaluate_results_on_custom_dataset(
 
 def run_tuning_impact_plot(*, eval_dir: Path):
     df = pd.read_csv(eval_dir / "results.csv", index_col=0)
-    df = df[~df["config_type"].isin(["REALMLP", "TABPFNV2"])]
+    df["roc_auc"] = 1 - df["metric_error"]
+    df["framework"] = df["framework"].str.replace("TA-", "")
+    df["config_type"] = df["config_type"].str.replace("TA-", "")
 
-    # new_df = df.groupby(["dataset", "framework"]).mean(numeric_only=True)
+    subset_df = df[df["framework"].str.contains("\(")]
+    numbers_df = subset_df.groupby(["dataset", "framework"])["roc_auc"].agg(["mean", "std"])
+    print(numbers_df)
+    numbers_df.to_csv(eval_dir / "tuning_impact_roc_auc_numbers.csv")
 
     framework_types = list(df["config_type"].unique())
     df = df.rename(columns={"framework": "method"})
 
     use_lim = True
     use_y = False
-    lim = [0.65, None]
+    lim = [0.65, 0.83]
     xlim = None
     ylim = None
     imputed_names = []
