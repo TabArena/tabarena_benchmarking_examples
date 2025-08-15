@@ -1,3 +1,8 @@
+"""Example of loading a custom task for TabArena.
+
+This file assumes the dataset is preprocessed and saved as a CSV file to `dataset_file`.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -13,7 +18,7 @@ TASK_CACHE_DIR = str(Path(__file__).parent / "tabarena_out" / "local_tasks")
 def get_tasks_for_biopsie(
     dataset_file: str = "biopsie_preprocessed_full_cohort.csv",
 ) -> UserTask:
-    """Generate a local task to be used by TabArena for the Biopsie dataset."""
+    """Generate a local task to be used by TabArena for the Biopsy dataset."""
     dataset = pd.read_csv(Path(__file__).parent / dataset_file)
     dataset = dataset.sample(frac=1.0, random_state=42).reset_index(drop=True)
 
