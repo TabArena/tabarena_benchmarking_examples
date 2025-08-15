@@ -4,6 +4,17 @@ from __future__ import annotations
 
 from tabflow_slurm.setup_slurm_base import BenchmarkSetup
 
+# --- RealMLP on GPU and with new search space (15/08/2025).
+BenchmarkSetup(
+    benchmark_name="realmlp_15082025",
+    models=[
+        ("RealMLP", "all", "fold-config-wise"),
+    ],
+    num_gpus=1,
+    methods_per_job=5,
+    tabarena_lite=True, # for testing
+).setup_jobs()
+
 # # --- Mitra Run (12/08/2025).
 # # Several jobs were stopped because of too conservative memory estimation, re-ran with 64GB RAM.
 # BenchmarkSetup(
