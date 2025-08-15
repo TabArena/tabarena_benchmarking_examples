@@ -88,9 +88,7 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
     task_metadata["dataset"] = [
         clf_task.tabarena_task_name,
     ]
-    task_metadata["NumberOfInstances"] = [
-        len(clf_task._dataset),
-    ]
+    task_metadata["NumberOfInstances"] = [len(clf_task.load_local_openml_task().get_dataset().get_data())]
     repo: EvaluationRepository = generate_repo(
         experiment_path=TABARENA_DIR, task_metadata=task_metadata
     )
@@ -109,6 +107,7 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
     df_results = PaperRunTabArena.compute_normalized_error_dynamic(
         df_results=df_results
     )
+    Path(EVAL_DIR).mkdir(exist_ok=True, parents=True)
     df_results.to_csv(Path(EVAL_DIR) / "results.csv")
 
 
