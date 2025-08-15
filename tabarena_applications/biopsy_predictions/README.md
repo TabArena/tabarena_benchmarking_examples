@@ -1,4 +1,4 @@
-# Biopsie Prediction Application with TabArena
+# Biopsy Prediction Application with TabArena
 
 This code contains an example of using the TabArena library to benchmark SOTA ML method for biopsy 
 predictions task, as required by clinicians. 
@@ -12,6 +12,6 @@ Then, one can schedule the job on a SLURM cluster with:
 
 ```bash
 # active your venv and cd to the directory of the script
-source /work/dlclarge2/purucker-tabarena/venvs/tabarena_ag14/bin/activate && cd /work/dlclarge2/purucker-tabarena/code/tabarena_benchmarking_examples/tabarena_applications/biopsie_predictions
+source /work/dlclarge2/purucker-tabarena/venvs/tabarena_ag14/bin/activate && cd /work/dlclarge2/purucker-tabarena/code/tabarena_benchmarking_examples/tabarena_applications/biopsy_predictions
 # now follow the output of run_on_slurm.py
 ```

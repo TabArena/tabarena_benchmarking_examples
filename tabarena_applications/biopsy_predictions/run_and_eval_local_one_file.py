@@ -1,3 +1,12 @@
+"""Example code to run and evaluate several SOTA ML models on a custom dataset using TabArena.
+
+This is an example of how to run all experiments in sequence on a custom dataset.
+If one wants to run many models and splits, this can take a long time.
+Thus, we recommend to parallelize the runs.
+
+The code below runs only the default configurations and the first fold of the dataset.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -5,21 +14,71 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from tabarena_applications.biopsy_predictions.get_local_task import (
+    get_tasks_for_biopsie,
+)
 from tabrepo import EvaluationRepository
-from tabrepo.benchmark.task import UserTask
+from tabrepo.benchmark.experiment import run_experiments_new
+from tabrepo.models.utils import get_configs_generator_from_name
 from tabrepo.nips2025_utils.fetch_metadata import load_task_metadata
 from tabrepo.nips2025_utils.generate_repo import generate_repo
 from tabrepo.paper.paper_runner_tabarena import PaperRunTabArena
 
-EVAL_DIR = str(Path(__file__).parent / "tabarena_out" / "slurm_results")
 REPO_DIR = str(Path(__file__).parent / "tabarena_out" / "repos")
-TABARENA_DIR = "/work/dlclarge2/purucker-tabarena/output/biopsy_13082025"
-UserTaskStr = "UserTask|1494229299|BiopsieCancerPrediction|/work/dlclarge2/purucker-tabarena/code/tabarena_benchmarking_examples/tabarena_applications/biopsie_predictions/tabarena_out/local_tasks"
+"""Cache location for the aggregated results."""
+TABARENA_DIR = str(Path(__file__).parent / "tabarena_out" / "custom_dataset")
+"""Output directory for saving the results and result artifacts from TabArena."""
+EVAL_DIR = str(Path(__file__).parent / "tabarena_out" / "evals")
+"""Output for artefacts from the evaluation results of the custom model."""
+
+def run_tabarena_with_custom_dataset() -> None:
+    """Run TabArena on a custom dataset."""
+    tasks = [get_tasks_for_biopsie()]
+
+    # Number of random configurations to generate for each model.
+    # set to larger than 0 to get tuning and ensembling results.
+    num_random_configs = 0
+    model_names = [
+        "RealMLP",
+        "TabM",
+        "ModernNCA",
+        "TabDPT",
+        "TabICL",
+        "TabPFNv2",
+        "Mitra",
+        "CatBoost",
+        "EBM",
+        "ExtraTrees",
+        "KNN",
+        "LightGBM",
+        "Linear",
+        "RandomForest",
+        "XGBoost",
+    ]
+
+    model_experiments = []
+    for model_name in model_names:
+        config_generator = get_configs_generator_from_name(model_name)
+        model_experiments.extend(
+            config_generator.generate_all_bag_experiments(
+                num_random_configs=num_random_configs
+            )
+        )
+
+    run_experiments_new(
+        output_dir=TABARENA_DIR,
+        model_experiments=model_experiments,
+        tasks=tasks,
+        repetitions_mode="matrix",
+        # run 1 fold, increase this to run more folds -> (3, 10)
+        repetitions_mode_args=(1, 1),
+    )
 
 
 def run_example_for_evaluate_results_on_custom_dataset() -> None:
     """Example for evaluating the cached results with similar plots to the TabArena paper."""
-    clf_task = UserTask.from_task_id_str(UserTaskStr)
+    clf_task = get_tasks_for_biopsie()
+
     task_metadata = load_task_metadata(paper=True)
     task_metadata = pd.DataFrame(columns=task_metadata.columns)
     task_metadata["tid"] = [clf_task.task_id]
@@ -28,7 +87,9 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
     task_metadata["dataset"] = [
         clf_task.tabarena_task_name,
     ]
-    task_metadata["NumberOfInstances"] = [2466]
+    task_metadata["NumberOfInstances"] = [
+        len(clf_task._dataset),
+    ]
     repo: EvaluationRepository = generate_repo(
         experiment_path=TABARENA_DIR, task_metadata=task_metadata
     )
@@ -48,15 +109,6 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
         df_results=df_results
     )
     df_results.to_csv(Path(EVAL_DIR) / "results.csv")
-    plotter.eval(
-        df_results=df_results,
-        framework_types_extra=list(df_results["config_type"].unique()),
-        baselines=None,
-        task_metadata=task_metadata,
-        calibration_framework="RF (default)",
-        plot_cdd=False,
-    )
-
 
 
 def run_simple_plot():
@@ -77,9 +129,9 @@ def run_simple_plot():
     )
     plt.xlabel("ROC AUC")
     plt.ylabel("Framework")
-    plt.xlim(0.6)
+    plt.xlim(0.5)
     plt.tight_layout()
-    plt.savefig(Path(EVAL_DIR) / "results.pdf")
+    plt.savefig(Path(EVAL_DIR) / "./results.pdf")
     plt.show()
 
     sns.barplot(
@@ -87,7 +139,7 @@ def run_simple_plot():
         x="metric_error",
         y="framework",
     )
-    plt.xlabel("Val ROC AUC")
+    plt.xlabel("Validation ROC AUC")
     plt.ylabel("Framework")
     plt.xlim(0.5)
     plt.tight_layout()
@@ -96,5 +148,6 @@ def run_simple_plot():
 
 
 if __name__ == "__main__":
+    run_tabarena_with_custom_dataset()
     run_example_for_evaluate_results_on_custom_dataset()
     run_simple_plot()
