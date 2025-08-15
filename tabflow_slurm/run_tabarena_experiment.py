@@ -112,6 +112,7 @@ def run_experiment(
     from tabrepo.benchmark.experiment import run_experiments_new
     from tabrepo.benchmark.experiment.experiment_constructor import (
         YamlExperimentSerializer,
+        YamlSingleExperimentSerializer,
     )
 
     try:
@@ -136,16 +137,6 @@ def run_experiment(
         }
         if "model_hyperparameters" not in method:
             method["model_hyperparameters"] = {}
-        if "ag_args_fit" not in method["model_hyperparameters"]:
-            method["model_hyperparameters"]["ag_args_fit"] = {}
-        # Default to 1 GPU per fit if multiple GPUs are available
-        method["model_hyperparameters"]["ag_args_fit"]["num_gpus"] = (
-            1 if num_gpus > 0 else 0
-        )
-        if num_gpus == 1:
-            # In this case, we can use all CPUs for fitting, as we have only one GPU for fitting anyhow.
-            method["model_hyperparameters"]["ag_args_fit"]["num_cpus"] = num_cpus
-
         if sequential_local_fold_fitting:
             if "ag_args_ensemble" not in method["model_hyperparameters"]:
                 method["model_hyperparameters"]["ag_args_ensemble"] = {}
@@ -153,7 +144,7 @@ def run_experiment(
                 "fold_fitting_strategy"
             ] = "sequential_local"
 
-        methods.append(YamlExperimentSerializer.parse_method(method))
+        methods.append(YamlSingleExperimentSerializer.parse_method(method))
 
     results_lst: dict[str, Any] = run_experiments_new(
         output_dir=output_dir,
