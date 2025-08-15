@@ -1,3 +1,8 @@
+"""Example of loading a custom task for TabArena.
+
+This file assumes the dataset is preprocessed and saved as a CSV file to `dataset_file`.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,9 +15,11 @@ TASK_CACHE_DIR = str(Path(__file__).parent / "tabarena_out" / "local_tasks")
 """Output for artefacts from the evaluation results of the custom model."""
 
 
-def get_tasks_for_biopsie() -> UserTask:
-    """Generate a local task to be used by TabArena for the Biopsie dataset."""
-    dataset = pd.read_csv(Path(__file__).parent / "biopsie_preprocessed.csv")
+def get_tasks_for_biopsie(
+    dataset_file: str = "biopsie_preprocessed_full_cohort.csv",
+) -> UserTask:
+    """Generate a local task to be used by TabArena for the Biopsy dataset."""
+    dataset = pd.read_csv(Path(__file__).parent / dataset_file)
     dataset = dataset.sample(frac=1.0, random_state=42).reset_index(drop=True)
 
     # Create a stratified 10-repeated 3-fold split (any other split can be used as well)
@@ -30,7 +37,7 @@ def get_tasks_for_biopsie() -> UserTask:
         splits[repeat_i][fold_i] = (train_idx.tolist(), test_idx.tolist())
 
     user_task = UserTask(
-        task_name="BiopsieCancerPrediction",
+        task_name=f"BiopsyCancerPrediction_{dataset_file}",
         task_cache_path=Path(TASK_CACHE_DIR),
     )
     oml_task = user_task.create_local_openml_task(

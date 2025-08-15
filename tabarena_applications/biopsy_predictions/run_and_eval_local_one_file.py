@@ -14,7 +14,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from tabarena_applications.biopsie_predictions.get_local_task import (
+from tabarena_applications.biopsy_predictions.get_local_task import (
     get_tasks_for_biopsie,
 )
 from tabrepo import EvaluationRepository
@@ -24,12 +24,13 @@ from tabrepo.nips2025_utils.fetch_metadata import load_task_metadata
 from tabrepo.nips2025_utils.generate_repo import generate_repo
 from tabrepo.paper.paper_runner_tabarena import PaperRunTabArena
 
-REPO_DIR = str(Path(__file__).parent / "tabarena_out" / "repos")
+REPO_DIR = str(Path(__file__).parent / "biopsy_example" / "repos")
 """Cache location for the aggregated results."""
-TABARENA_DIR = str(Path(__file__).parent / "tabarena_out" / "custom_dataset")
+TABARENA_DIR = str(Path(__file__).parent / "biopsy_example" / "tabarena_out")
 """Output directory for saving the results and result artifacts from TabArena."""
-EVAL_DIR = str(Path(__file__).parent / "tabarena_out" / "evals")
+EVAL_DIR = str(Path(__file__).parent / "biopsy_example" / "evals")
 """Output for artefacts from the evaluation results of the custom model."""
+
 
 def run_tabarena_with_custom_dataset() -> None:
     """Run TabArena on a custom dataset."""
@@ -39,21 +40,19 @@ def run_tabarena_with_custom_dataset() -> None:
     # set to larger than 0 to get tuning and ensembling results.
     num_random_configs = 0
     model_names = [
+        # -- TFMs
+        "TabPFNv2",
+        # -- Neural networks
         "RealMLP",
         "TabM",
-        "ModernNCA",
-        "TabDPT",
-        "TabICL",
-        "TabPFNv2",
-        "Mitra",
+        # -- Tree-based models
         "CatBoost",
         "EBM",
-        "ExtraTrees",
-        "KNN",
         "LightGBM",
-        "Linear",
         "RandomForest",
-        "XGBoost",
+        # -- Baselines
+        "KNN",
+        "Linear"
     ]
 
     model_experiments = []
@@ -61,7 +60,8 @@ def run_tabarena_with_custom_dataset() -> None:
         config_generator = get_configs_generator_from_name(model_name)
         model_experiments.extend(
             config_generator.generate_all_bag_experiments(
-                num_random_configs=num_random_configs
+                num_random_configs=num_random_configs,
+                add_seed="fold-config-wise",
             )
         )
 
@@ -70,7 +70,8 @@ def run_tabarena_with_custom_dataset() -> None:
         model_experiments=model_experiments,
         tasks=tasks,
         repetitions_mode="matrix",
-        # run 1 fold, increase this to run more folds -> (3, 10)
+        # run 1 fold, increase this to run more folds -> (3, 10) will run all experiments
+        # via 10-repeated 3-fold cross-validation
         repetitions_mode_args=(1, 1),
     )
 
@@ -87,9 +88,7 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
     task_metadata["dataset"] = [
         clf_task.tabarena_task_name,
     ]
-    task_metadata["NumberOfInstances"] = [
-        len(clf_task._dataset),
-    ]
+    task_metadata["NumberOfInstances"] = [len(clf_task.load_local_openml_task().get_dataset().get_data())]
     repo: EvaluationRepository = generate_repo(
         experiment_path=TABARENA_DIR, task_metadata=task_metadata
     )
@@ -108,6 +107,7 @@ def run_example_for_evaluate_results_on_custom_dataset() -> None:
     df_results = PaperRunTabArena.compute_normalized_error_dynamic(
         df_results=df_results
     )
+    Path(EVAL_DIR).mkdir(exist_ok=True, parents=True)
     df_results.to_csv(Path(EVAL_DIR) / "results.csv")
 
 
