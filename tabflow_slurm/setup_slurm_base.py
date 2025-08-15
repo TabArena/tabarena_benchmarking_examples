@@ -45,7 +45,7 @@ class BenchmarkSetup:
             - slurm_out         -- contains all SLURM output logs
             - .openml-cache     -- contains the OpenML cache
     """
-    python_from_base_path: str = "venvs/tabarena_ag14/bin/python"
+    python_from_base_path: str = "venvs/tabarena_1508/bin/python"
     """Python executable and environment to use for the SLURM jobs. This should point to a Python
     executable within a (virtual) environment."""
     run_script_from_base_path: str = (
@@ -145,7 +145,7 @@ class BenchmarkSetup:
             ("Mitra", "all", "fold-config-wise"),
             # -- Neural networks
             ("TabM", "all", "static"),
-            ("RealMLP", "all", "static"),
+            ("RealMLP", "all", "fold-config-wise"),
             ("ModernNCA", "all", "static"),
             ("FastaiMLP", "all", "static"),
             ("TorchMLP", "all", "static"),
