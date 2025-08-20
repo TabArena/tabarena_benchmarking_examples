@@ -217,7 +217,7 @@ def run_tabarena_with_custom_dataset() -> None:
 
 
 def run_example_for_evaluate_results_on_custom_dataset() -> None:
-    """Example for evaluating the cached results with similar plots to the TabArena paper."""
+    """Example for evaluating the results after running `run_tabarena_with_custom_dataset` using similar plots to the TabArena paper."""
     from tabrepo import EvaluationRepository
     from tabrepo.nips2025_utils.fetch_metadata import load_task_metadata
     from tabrepo.nips2025_utils.generate_repo import generate_repo
