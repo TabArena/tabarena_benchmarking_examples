@@ -15,7 +15,7 @@
 This repository contains examples for various use cases of [TabArena](https://tabarena.ai)'s 
 [code](https://github.com/autogluon/tabrepo/), a benchmarking framework for tabular data.
 
-### 🕹️ Use Cases
+## 🕹️ Use Cases
 
 ### ⚡ Minimal Examples
 
@@ -28,17 +28,21 @@ A lightweight starting point for various TabArena use cases.
     - Get the data used by TabArena from OpenML, without the TabArena framework: `get_tabarena_data.py`
     - Implement your own model for TabArena and benchmark it on TabArena-Lite: `custom_tabarena_model/`
 
+---
+
 ### 🔬 TabArena Applications Predictions
 
-Example of using TabArena in a real-world application
+Example of using TabArena in a real-world application.
 
 - **Folder:** `tabarena_applications/`
 - **Highlights:**
     - Evaluating SOTA ML models on a custom (private) Biopsy dataset with TabArena: `biopsy_predictions/`
 
+---
+
 ### 🖥️ TabArena on SLURM Integration
 
-Templates for running **TabArena** on SLURM clusters.
+Templates for running TabArena on SLURM clusters.
 
 - **Folder:** `tabflow_slurm/`
 - **Highlights:** All code we use to run TabArena (fully parallelized) on SLURM.
