@@ -28,7 +28,6 @@ A lightweight starting point for various TabArena use cases.
     - Get the data used by TabArena from OpenML, without the TabArena framework: `get_tabarena_data.py`
     - Implement your own model for TabArena and benchmark it on TabArena-Lite: `custom_tabarena_model/`
 
----
 
 ### 🔬 TabArena Applications Predictions
 
@@ -38,9 +37,8 @@ Example of using TabArena in a real-world application.
 - **Highlights:**
     - Evaluating SOTA ML models on a custom (private) Biopsy dataset with TabArena: `biopsy_predictions/`
 
----
 
-### 🖥️ TabArena on SLURM Integration
+### 🖥️ TabArena on SLURM
 
 Templates for running TabArena on SLURM clusters.
 
