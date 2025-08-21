@@ -51,8 +51,8 @@ def get_custom_classification_task() -> UserTask:
     # Transform the splits into a standard dictionary format expected by TabArena
     splits = {}
     for split_i, (train_idx, test_idx) in enumerate(sklearn_splits):
-        repeat_i = split_i // n_repeats
-        fold_i = split_i % n_repeats
+        repeat_i = split_i // n_splits
+        fold_i = split_i % n_splits
         if repeat_i not in splits:
             splits[repeat_i] = {}
         splits[repeat_i][fold_i] = (train_idx.tolist(), test_idx.tolist())
@@ -217,7 +217,7 @@ def run_tabarena_with_custom_dataset() -> None:
 
 
 def run_example_for_evaluate_results_on_custom_dataset() -> None:
-    """Example for evaluating the cached results with similar plots to the TabArena paper."""
+    """Example for evaluating the results after running `run_tabarena_with_custom_dataset` using similar plots to the TabArena paper."""
     from tabrepo import EvaluationRepository
     from tabrepo.nips2025_utils.fetch_metadata import load_task_metadata
     from tabrepo.nips2025_utils.generate_repo import generate_repo
