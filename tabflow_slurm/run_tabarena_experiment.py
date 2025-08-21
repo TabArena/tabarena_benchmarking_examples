@@ -127,14 +127,17 @@ def run_experiment(
     for m_i, method in enumerate(yaml_out):
         if (config_index is not None) and (m_i not in config_index):
             continue
-        method["method_kwargs"] = {}
+
+        if "method_kwargs" not in method:
+            method["method_kwargs"] = {}
 
         # Logic to handle resources and special model cases
-        method["method_kwargs"]["fit_kwargs"] = {
-            "num_cpus": num_cpus,
-            "num_gpus": num_gpus,
-            "memory_limit": memory_limit,
-        }
+        if "fit_kwargs" not in method["method_kwargs"]:
+            method["method_kwargs"]["fit_kwargs"] = {}
+        method["method_kwargs"]["fit_kwargs"]["num_cpus"] = num_cpus
+        method["method_kwargs"]["fit_kwargs"]["num_gpus"] = num_gpus
+        method["method_kwargs"]["fit_kwargs"]["memory_limit"] = memory_limit
+
         if "model_hyperparameters" not in method:
             method["model_hyperparameters"] = {}
         if sequential_local_fold_fitting:
