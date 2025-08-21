@@ -7,7 +7,6 @@ A special feature of this code is that we use TabArena with a local dataset that
 
 Requires the environment from the main README.md file. For `run_on_slurm.py` also see the readme in `tabflow_slurm`.
 
-
 Then, one can schedule the job on a SLURM cluster with:
 
 ```bash
