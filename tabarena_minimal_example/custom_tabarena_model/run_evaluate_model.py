@@ -7,7 +7,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tabrepo.nips2025_utils.end_to_end import EndToEnd, EndToEndResults
+from tabrepo.nips2025_utils.end_to_end_single import EndToEndSingle, EndToEndResultsSingle
+from tabrepo.tabarena.website_format import format_leaderboard
 
 if __name__ == "__main__":
     path_raw = Path(__file__).parent / "tabarena_out" / "custom_model"
@@ -24,6 +25,7 @@ if __name__ == "__main__":
     1. load raw artifacts
         path_raw should be a directory containing `results.pkl` files for each run.
         In the current code, we require `path_raw` to contain the results of only 1 type of method.
+        For processing multiple methods at once, use `tabrepo.nips2025_utils.end_to_end.EndToEnd` 
     2. infer method_metadata
     3. cache method_metadata
     4. cache raw artifacts
@@ -36,14 +38,18 @@ if __name__ == "__main__":
     Once this is executed once, it does not need to be ran again.
     """
     if cache:
-        end_to_end = EndToEnd.from_path_raw(path_raw=path_raw)
+        end_to_end = EndToEndSingle.from_path_raw(path_raw=path_raw)
+        end_to_end_results = end_to_end.to_results()
 
     """
     Load cached results and compare on TabArena
     1. Generates figures and leaderboard using the TabArena methods and the user's method
     2. Currently compares on all datasets, does not compare on subsets.
     3. Missing values are imputed to default RandomForest.
+    4. only_valid_tasks=True will limit the comparison to only tasks with results from the user's method
+       This means the results will not perform imputation.
     """
-    end_to_end_results = EndToEndResults.from_cache(method=method)
-    leaderboard = end_to_end_results.compare_on_tabarena(output_dir=fig_output_dir)
-    print(leaderboard)
+    end_to_end_results = EndToEndResultsSingle.from_cache(method=method)
+    leaderboard = end_to_end_results.compare_on_tabarena(only_valid_tasks=True, output_dir=fig_output_dir)
+    leaderboard_website = format_leaderboard(leaderboard)
+    print(leaderboard_website.to_markdown(index=False))
