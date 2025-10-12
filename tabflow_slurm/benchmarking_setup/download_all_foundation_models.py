@@ -7,6 +7,7 @@ from tabrepo.benchmark.models.ag.tabdpt.tabdpt_model import TabDPTModel
 
 if __name__ == "__main__":
     # TabPFNv2
+    # TODO: need to hardcode the model names as names have changed in the code below...
     _, model_dir, _, _ = resolve_model_path(model_path=None, which="classifier")
     download_all_models(to=model_dir)
 
@@ -30,3 +31,11 @@ if __name__ == "__main__":
         print("TabFlexModel not found. Skipping downloading its models.")
     else:
         TabFlexModel._download_all_models()
+
+    # LimiX
+    try:
+        from tabrepo.benchmark.models.ag.limix.limix_model import LimiXModel
+    except ImportError:
+        print("LimiXModel not found. Skipping downloading its models.")
+    else:
+        LimiXModel.download_model()
