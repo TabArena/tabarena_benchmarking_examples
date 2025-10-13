@@ -149,6 +149,19 @@ def run_experiment(
 
         methods.append(YamlSingleExperimentSerializer.parse_method(method))
 
+    for m_i in range(len(methods)):
+        preprocessing_name = methods[m_i].method_kwargs.pop(
+            "preprocessing_pipeline", None
+        )
+
+        if preprocessing_name is not None:
+            print("Adding preprocessing to the config:", preprocessing_name)
+            from tabrepo.benchmark.preprocessing.preprocessing_register import (
+                PREPROCESSING_METHODS,
+            )
+
+            methods[m_i] = PREPROCESSING_METHODS[preprocessing_name](methods[m_i])
+
     results_lst: dict[str, Any] = run_experiments_new(
         output_dir=output_dir,
         model_experiments=methods,
