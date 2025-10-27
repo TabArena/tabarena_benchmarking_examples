@@ -11,11 +11,12 @@ from sklearn.model_selection import RepeatedStratifiedKFold, train_test_split
 from tabrepo.benchmark.experiment import run_experiments_new
 from tabrepo.benchmark.task import UserTask
 
-REPO_DIR = str(Path(__file__).parent / "repos" / "custom_dataset")
+BASE_PATH = Path(__file__).parent / "run_tabarena_on_custom_dataset_output"
+REPO_DIR = str(BASE_PATH / "repos")
 """Cache location for the aggregated results."""
-TABARENA_DIR = str(Path(__file__).parent / "tabarena_out" / "custom_dataset")
+TABARENA_DIR = str(BASE_PATH / "tabarena_out")
 """Output directory for saving the results and result artifacts from TabArena."""
-EVAL_DIR = str(Path(__file__).parent / "evals" / "custom_dataset")
+EVAL_DIR = str(BASE_PATH / "evals")
 """Output for artefacts from the evaluation results of the custom model."""
 TASK_CACHE_DIR = str(Path(__file__).parent / "task_cache")
 """Cache location for the local OpenML tasks created from the custom dataset."""
@@ -172,7 +173,7 @@ def get_model_configs_to_benchmark(
 
     # Get our custom random forest model
     if custom_rf:
-        from custom_tabarena_model import get_configs_for_custom_rf
+        from custom_tabarena_model.custom_tabarena_model import get_configs_for_custom_rf
 
         experiments_lst.extend(
             get_configs_for_custom_rf(
