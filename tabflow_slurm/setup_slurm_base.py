@@ -45,7 +45,7 @@ class BenchmarkSetup:
             - slurm_out         -- contains all SLURM output logs
             - .openml-cache     -- contains the OpenML cache
     """
-    python_from_base_path: str = "venvs/tabarena_1508/bin/python"
+    python_from_base_path: str = "venvs/tabarena_1610/bin/python"
     """Python executable and environment to use for the SLURM jobs. This should point to a Python
     executable within a (virtual) environment."""
     run_script_from_base_path: str = (
@@ -120,6 +120,8 @@ class BenchmarkSetup:
     memory_limit: int = 32
     """Memory limit for the SLURM jobs. The memory limit available on the node and in sync with
     the slurm_script."""
+    time_limit: int | None = 3600
+    """Time limit for each fit of a model in seconds. If None, 3600 seconds is used."""
     n_random_configs: int = 200
     """Number of random hyperparameter configurations to run for each model"""
     models: list[tuple[str, int | str, str]] = field(default_factory=list)
@@ -412,6 +414,7 @@ class BenchmarkSetup:
                         add_seed=seed_config,
                         name_id_suffix=name_id_suffix,
                         method_kwargs=pipeline_method_kwargs,
+                        time_limit=self.time_limit,
                     )
                 )
 

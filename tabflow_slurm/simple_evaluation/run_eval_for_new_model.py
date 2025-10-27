@@ -60,7 +60,6 @@ def run_eval_for_new_models(
     leaderboard = end_to_end_results.compare_on_tabarena(
         output_dir=fig_output_dir,
         subset=subset,
-        score_on_val=True,
     )
     leaderboard_website = format_leaderboard(df_leaderboard=leaderboard)
     print(leaderboard_website.to_markdown(index=False))
@@ -73,13 +72,11 @@ if __name__ == "__main__":
     run_eval_for_new_models(
         [
             ModelMetadata(
-                path_raw=out_dir / "mnca_02102025",
-                method="ModernNCA",
+                path_raw=out_dir / "tabdpt_16102025",
+                method="TabDPT",
                 new_result_prefix="_[New]",
-                only_load_cache=False,
             ),
         ],
-        subset=["lite", "classification"],
-        fig_output_dir=fig_dir / "mnca",
+        fig_output_dir=fig_dir / "tabdpt",
         cache_path="/work/dlclarge2/purucker-tabarena/output/tabarena_cache",
     )

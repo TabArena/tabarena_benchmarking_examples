@@ -4,6 +4,16 @@ from __future__ import annotations
 
 from tabflow_slurm.setup_slurm_base import BenchmarkSetup
 
+# --- TabDPT New Version
+BenchmarkSetup(
+    benchmark_name="tabdpt_16102025",
+    models=[
+        ("TabDPT", "all", "fold-config-wise"),
+    ],
+    num_gpus=1,
+    methods_per_job=1,
+    time_limit=14400, # 4 hours to get all results even for largest datasets which is super slow for TabDPT
+).setup_jobs()
 
 # # --- Checking classification bug with ModernNCA (02/10/2025).
 # BenchmarkSetup(
