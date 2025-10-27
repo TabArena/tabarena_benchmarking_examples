@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH --partition=alldlc2_gpu-l40s
-#SBATCH --mem=32G
+#SBATCH --partition=alldlc2_gpu-l40s # --partition=mldlc2_gpu-h200
+#SBATCH --mem-per-gpu=32G
 #SBATCH --time=6:00:00
 #SBATCH --cpus-per-task=8
 #SBATCH --ntasks=1
 #SBATCH --job-name=tabarena_gpu_run
-#SBATCH --export=ALL
+#SBATCH --export=ALL # ;CUDA_HOME=/usr/local/cuda
 #SBATCH --requeue
 #SBATCH --gres=gpu:1,localtmp:100
 #SBATCH --propagate=NONE

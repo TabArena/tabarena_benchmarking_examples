@@ -4,16 +4,61 @@ from __future__ import annotations
 
 from tabflow_slurm.setup_slurm_base import BenchmarkSetup
 
-# --- RealMLP on GPU and with new search space (15/08/2025).
+# --- TabDPT New Version
 BenchmarkSetup(
-    benchmark_name="realmlp_15082025",
+    benchmark_name="tabdpt_16102025",
     models=[
-        ("RealMLP", "all", "fold-config-wise"),
+        ("TabDPT", "all", "fold-config-wise"),
     ],
     num_gpus=1,
-    methods_per_job=5,
-    tabarena_lite=True, # for testing
+    methods_per_job=1,
+    time_limit=14400, # 4 hours to get all results even for largest datasets which is super slow for TabDPT
 ).setup_jobs()
+
+# # --- Checking classification bug with ModernNCA (02/10/2025).
+# BenchmarkSetup(
+#     benchmark_name="mnca_02102025",
+#     models=[
+#         ("ModernNCA", "all", "static"),
+#     ],
+#     num_gpus=1,
+#     tabarena_lite=True,
+#     problem_types_to_run=[
+#         "binary",
+#         "multiclass",
+#     ],
+#     methods_per_job=10,
+# ).setup_jobs()
+
+# # --- xRFM For TabArena-Full
+# BenchmarkSetup(
+#     benchmark_name="xrfm_08092025",
+#     models=[
+#         ("xRFM", "all", "fold-config-wise"),
+#     ],
+#     num_gpus=1,
+#     methods_per_job=10,
+#     memory_limit=40, # for VRAM estimate
+# ).setup_jobs()
+
+# # --- LimiX (ran only for TabPFN-subset)
+# BenchmarkSetup(
+#     benchmark_name="limix_04092025_no_retrieval",
+#     models=[
+#         ("LimiX", 0, "fold-config-wise"),
+#     ],
+#     num_gpus=1,
+# ).setup_jobs()
+
+# # --- RealMLP on GPU and with new search space (15/08/2025).
+# BenchmarkSetup(
+#     benchmark_name="realmlp_15082025",
+#     models=[
+#         ("RealMLP", "all", "fold-config-wise"),
+#     ],
+#     num_gpus=1,
+#     methods_per_job=5,
+# ).setup_jobs()
 
 # # --- Mitra Run (12/08/2025).
 # # Several jobs were stopped because of too conservative memory estimation, re-ran with 64GB RAM.

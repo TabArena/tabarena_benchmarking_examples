@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=bosch_cpu-cascadelake
-#SBATCH --mem=32G
+#SBATCH --mem-per-cpu=4G
 #SBATCH --time=6:00:00
 #SBATCH --cpus-per-task=8
 #SBATCH --ntasks=1

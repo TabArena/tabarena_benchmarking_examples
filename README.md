@@ -70,8 +70,7 @@ git clone --branch main https://github.com/autogluon/tabrepo.git
 git clone --branch master https://github.com/autogluon/autogluon
 ./autogluon/full_install.sh
 
-# use GIT_LFS_SKIP_SMUDGE=1 in front of the command if installing TabDPT fails due to a broken LFS/pip setup
-GIT_LFS_SKIP_SMUDGE=1 uv pip install -e tabrepo/[benchmark]
+uv pip install -e tabrepo/[benchmark]
 
 # When planning to only run experiments on CPU, also run the following:
 uv pip install -U torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu

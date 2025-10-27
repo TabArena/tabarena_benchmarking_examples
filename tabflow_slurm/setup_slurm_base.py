@@ -45,7 +45,7 @@ class BenchmarkSetup:
             - slurm_out         -- contains all SLURM output logs
             - .openml-cache     -- contains the OpenML cache
     """
-    python_from_base_path: str = "venvs/tabarena_1508/bin/python"
+    python_from_base_path: str = "venvs/tabarena_1610/bin/python"
     """Python executable and environment to use for the SLURM jobs. This should point to a Python
     executable within a (virtual) environment."""
     run_script_from_base_path: str = (
@@ -120,6 +120,8 @@ class BenchmarkSetup:
     memory_limit: int = 32
     """Memory limit for the SLURM jobs. The memory limit available on the node and in sync with
     the slurm_script."""
+    time_limit: int | None = 3600
+    """Time limit for each fit of a model in seconds. If None, 3600 seconds is used."""
     n_random_configs: int = 200
     """Number of random hyperparameter configurations to run for each model"""
     models: list[tuple[str, int | str, str]] = field(default_factory=list)
@@ -168,6 +170,19 @@ class BenchmarkSetup:
     setup_ray_for_slurm_shared_resources_environment: bool = True
     """Prepare Ray for a SLURM shared resource environment. This is used to setup Ray for SLURM
     shared resources. Recommended to set to True if sequential_local_fold_fitting is False."""
+    preprocessing_pieplines: list[str] = field(
+        default_factory=lambda: ["default"]
+    )
+    """Preprocessing pipelines to add to the configurations we want to run.
+
+    Each options multiplies the number of configurations to run by the number of
+    pipelines. For example, if we have 10 configurations and 2 pipelines, we will
+    run 20 configurations.
+
+    Options:
+        - "default": Use the default preprocessing pipeline.
+        - Any other string registered in `tabrepo.benchmark.preprocessing.preprocessing_register`.
+    """
 
     # Misc Settings
     # -------------
@@ -368,27 +383,40 @@ class BenchmarkSetup:
             method_kwargs["init_kwargs"] = {
                 "default_base_path": self.model_artifacts_base_path
             }
+
         print(
             "Generating experiments for models...",
             f"\n\t`all` := number of configs: {self.n_random_configs}",
             f"\n\t{len(self.models)} models: {self.models}",
+            f"\n\t{len(self.preprocessing_pieplines)} preprocessing pipelines: {self.preprocessing_pieplines}",
+            f"\n\tMethod kwargs: {method_kwargs}",
         )
-        for model_name, n_configs, seed_config in self.models:
-            if isinstance(n_configs, str) and n_configs == "all":
-                n_configs = self.n_random_configs
-            elif not isinstance(n_configs, int):
-                raise ValueError(
-                    f"Invalid number of configurations for model {model_name}: {n_configs}. "
-                    "Must be an integer or 'all'."
+        for preprocessing_name in self.preprocessing_pieplines:
+            pipeline_method_kwargs = deepcopy(method_kwargs)
+
+            name_id_suffix = ""
+            if preprocessing_name != "default":
+                pipeline_method_kwargs["preprocessing_pipeline"] = preprocessing_name
+                name_id_suffix = f"_{preprocessing_name}"
+
+            for model_name, n_configs, seed_config in self.models:
+                if isinstance(n_configs, str) and n_configs == "all":
+                    n_configs = self.n_random_configs
+                elif not isinstance(n_configs, int):
+                    raise ValueError(
+                        f"Invalid number of configurations for model {model_name}: {n_configs}. "
+                        "Must be an integer or 'all'."
+                    )
+                config_generator = get_configs_generator_from_name(model_name)
+                experiments_lst.append(
+                    config_generator.generate_all_bag_experiments(
+                        num_random_configs=n_configs,
+                        add_seed=seed_config,
+                        name_id_suffix=name_id_suffix,
+                        method_kwargs=pipeline_method_kwargs,
+                        time_limit=self.time_limit,
+                    )
                 )
-            config_generator = get_configs_generator_from_name(model_name)
-            experiments_lst.append(
-                config_generator.generate_all_bag_experiments(
-                    num_random_configs=n_configs,
-                    add_seed=seed_config,
-                    method_kwargs=method_kwargs,
-                )
-            )
 
         # Post Process experiment list
         experiments_all: list[AGModelBagExperiment] = [
@@ -454,7 +482,7 @@ class BenchmarkSetup:
         - <=500 features
         - <=10 classes
         """
-        return ["TabPFNV2Model", "MitraModel"]
+        return ["TA-TABPFNV2", "TABPFNV2", "MITRA"]
 
     @staticmethod
     def models_for_tabicl_subset() -> list[str]:
@@ -463,7 +491,7 @@ class BenchmarkSetup:
         - <=10k training samples
         - <=500 features
         """
-        return ["TabICLModel"]
+        return ["TA-TABICL", "TABICL"]
 
 
 def should_run_job_batch(*, input_data_list: list[dict], **kwargs) -> list[bool]:
