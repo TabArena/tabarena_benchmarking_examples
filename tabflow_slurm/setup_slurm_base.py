@@ -18,8 +18,8 @@ import pandas as pd
 import ray
 import yaml
 from tabflow_slurm.ray_utils import ray_map_list, to_batch_list
-from tabrepo.benchmark.experiment.experiment_utils import check_cache_hit
-from tabrepo.utils.cache import CacheFunctionPickle
+from tabarena.benchmark.experiment.experiment_utils import check_cache_hit
+from tabarena.utils.cache import CacheFunctionPickle
 
 
 @dataclass
@@ -181,7 +181,7 @@ class BenchmarkSetup:
 
     Options:
         - "default": Use the default preprocessing pipeline.
-        - Any other string registered in `tabrepo.benchmark.preprocessing.preprocessing_register`.
+        - Any other string registered in `tabarena.benchmark.preprocessing.preprocessing_register`.
     """
 
     # Misc Settings
@@ -371,11 +371,11 @@ class BenchmarkSetup:
         """Generate the YAML file with the configurations to run based
         on specific models to run.
         """
-        from tabrepo.benchmark.experiment import (
+        from tabarena.benchmark.experiment import (
             AGModelBagExperiment,
             YamlExperimentSerializer,
         )
-        from tabrepo.models.utils import get_configs_generator_from_name
+        from tabarena.models.utils import get_configs_generator_from_name
 
         experiments_lst = []
         method_kwargs = {}

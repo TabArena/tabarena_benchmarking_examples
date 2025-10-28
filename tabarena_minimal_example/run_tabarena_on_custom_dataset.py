@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 from sklearn.datasets import make_classification, make_regression
 from sklearn.model_selection import RepeatedStratifiedKFold, train_test_split
-from tabrepo.benchmark.experiment import run_experiments_new
-from tabrepo.benchmark.task import UserTask
+from tabarena.benchmark.experiment import run_experiments_new
+from tabarena.benchmark.task import UserTask
 
 BASE_PATH = Path(__file__).parent / "run_tabarena_on_custom_dataset_output"
 REPO_DIR = str(BASE_PATH / "repos")
@@ -139,7 +139,7 @@ def get_model_configs_to_benchmark(
     experiments_lst : list
         A list of configurations for TabArena.
     """
-    from tabrepo.models.utils import get_configs_generator_from_name
+    from tabarena.models.utils import get_configs_generator_from_name
 
     if model_names is None:
         model_names = [
@@ -219,10 +219,10 @@ def run_tabarena_with_custom_dataset() -> None:
 
 def run_example_for_evaluate_results_on_custom_dataset() -> None:
     """Example for evaluating the results after running `run_tabarena_with_custom_dataset` using similar plots to the TabArena paper."""
-    from tabrepo import EvaluationRepository
-    from tabrepo.nips2025_utils.fetch_metadata import load_task_metadata
-    from tabrepo.nips2025_utils.generate_repo import generate_repo
-    from tabrepo.paper.paper_runner_tabarena import PaperRunTabArena
+    from tabarena import EvaluationRepository
+    from tabarena.nips2025_utils.fetch_metadata import load_task_metadata
+    from tabarena.nips2025_utils.generate_repo import generate_repo
+    from tabarena.paper.paper_runner_tabarena import PaperRunTabArena
 
     clf_task, reg_task = get_custom_classification_task(), get_custom_regression_task()
 

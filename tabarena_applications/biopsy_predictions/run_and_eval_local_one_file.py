@@ -17,12 +17,12 @@ import seaborn as sns
 from tabarena_applications.biopsy_predictions.get_local_task import (
     get_tasks_for_biopsie,
 )
-from tabrepo import EvaluationRepository
-from tabrepo.benchmark.experiment import run_experiments_new
-from tabrepo.models.utils import get_configs_generator_from_name
-from tabrepo.nips2025_utils.fetch_metadata import load_task_metadata
-from tabrepo.nips2025_utils.generate_repo import generate_repo
-from tabrepo.paper.paper_runner_tabarena import PaperRunTabArena
+from tabarena import EvaluationRepository
+from tabarena.benchmark.experiment import run_experiments_new
+from tabarena.models.utils import get_configs_generator_from_name
+from tabarena.nips2025_utils.fetch_metadata import load_task_metadata
+from tabarena.nips2025_utils.generate_repo import generate_repo
+from tabarena.paper.paper_runner_tabarena import PaperRunTabArena
 
 REPO_DIR = str(Path(__file__).parent / "biopsy_example" / "repos")
 """Cache location for the aggregated results."""

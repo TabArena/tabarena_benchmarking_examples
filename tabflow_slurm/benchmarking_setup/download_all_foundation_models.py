@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     # TabFlex
     try:
-        from tabrepo.benchmark.models.ag.tabflex.tabflex_model import TabFlexModel
+        from tabarena.benchmark.models.ag.tabflex.tabflex_model import TabFlexModel
     except ImportError:
         print("TabFlexModel not found. Skipping downloading its models.")
     else:
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # LimiX
     try:
-        from tabrepo.benchmark.models.ag.limix.limix_model import LimiXModel
+        from tabarena.benchmark.models.ag.limix.limix_model import LimiXModel
     except ImportError:
         print("LimiXModel not found. Skipping downloading its models.")
     else:

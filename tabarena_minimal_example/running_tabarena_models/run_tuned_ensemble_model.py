@@ -7,7 +7,7 @@ from tabarena_minimal_example.running_tabarena_models.data_utils import (
     get_example_data_for_task_type,
     score_for_task_type,
 )
-from tabrepo.models.utils import get_configs_generator_from_name
+from tabarena.models.utils import get_configs_generator_from_name
 
 task_type = "regression"
 """Task type for the model to run on.

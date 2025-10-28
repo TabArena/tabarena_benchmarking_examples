@@ -109,8 +109,8 @@ def run_experiment(
         Whether to use sequential local fold fitting or not. If True, the experiment will be run without
         Ray. This might create a large speedup for some models.
     """
-    from tabrepo.benchmark.experiment import run_experiments_new
-    from tabrepo.benchmark.experiment.experiment_constructor import (
+    from tabarena.benchmark.experiment import run_experiments_new
+    from tabarena.benchmark.experiment.experiment_constructor import (
         YamlExperimentSerializer,
         YamlSingleExperimentSerializer,
     )
@@ -118,7 +118,7 @@ def run_experiment(
     try:
         task_id_or_object = int(task_id)
     except ValueError:
-        from tabrepo.benchmark.task.user_task import UserTask
+        from tabarena.benchmark.task.user_task import UserTask
 
         task_id_or_object = UserTask.from_task_id_str(task_id)
 
@@ -156,7 +156,7 @@ def run_experiment(
 
         if preprocessing_name is not None:
             print("Adding preprocessing to the config:", preprocessing_name)
-            from tabrepo.benchmark.preprocessing.preprocessing_register import (
+            from tabarena.benchmark.preprocessing.preprocessing_register import (
                 PREPROCESSING_METHODS,
             )
 

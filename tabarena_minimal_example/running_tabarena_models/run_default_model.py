@@ -9,7 +9,7 @@ from tabarena_minimal_example.running_tabarena_models.data_utils import (
     get_example_data_for_task_type,
     score_for_task_type,
 )
-from tabrepo.models.utils import get_configs_generator_from_name
+from tabarena.models.utils import get_configs_generator_from_name
 
 task_type = "binary"
 """Task type for the model to run on.
@@ -48,7 +48,7 @@ The recommended options are:
 
 You can also import it manually from TabArena / AutoGluon, which we recommend
 for practical applications, for example:
- - RealMLP: from tabrepo.benchmark.models.ag.realmlp.realmlp_model import RealMLPModel
+ - RealMLP: from tabarena.benchmark.models.ag.realmlp.realmlp_model import RealMLPModel
  - Catboost: from autogluon.tabular.models.catboost.catboost_model import CatBoostModel
 """
 model_meta = get_configs_generator_from_name(model_name=model_to_run)

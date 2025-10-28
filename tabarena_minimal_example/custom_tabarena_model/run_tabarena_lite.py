@@ -6,7 +6,7 @@ from pathlib import Path
 
 import openml
 from custom_tabarena_model import get_configs_for_custom_rf
-from tabrepo.benchmark.experiment import run_experiments_new
+from tabarena.benchmark.experiment import run_experiments_new
 
 TABARENA_DIR = str(Path(__file__).parent / "tabarena_out" / "custom_model")
 """Output directory for saving the results and result artifacts from TabArena."""
