@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from matplotlib.patches import Patch
-from tabrepo import EvaluationRepository
-from tabrepo.benchmark.task import UserTask
-from tabrepo.nips2025_utils.fetch_metadata import load_task_metadata
-from tabrepo.nips2025_utils.generate_repo import generate_repo
-from tabrepo.paper.paper_runner_tabarena import PaperRunTabArena
-from tabrepo.paper.paper_utils import get_framework_type_method_names
+from tabarena import EvaluationRepository
+from tabarena.benchmark.task import UserTask
+from tabarena.nips2025_utils.fetch_metadata import load_task_metadata
+from tabarena.nips2025_utils.generate_repo import generate_repo
+from tabarena.paper.paper_runner_tabarena import PaperRunTabArena
+from tabarena.paper.paper_utils import get_framework_type_method_names
 
 
 def run_example_for_evaluate_results_on_custom_dataset(

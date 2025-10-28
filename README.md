@@ -13,7 +13,7 @@
 </div>
 
 This repository contains examples for various use cases of [TabArena](https://tabarena.ai)'s 
-[code](https://github.com/autogluon/tabrepo/), a benchmarking framework for tabular data.
+[code](https://github.com/autogluon/tabarena/), a benchmarking framework for tabular data.
 
 ## 🕹️ Use Cases
 
@@ -64,26 +64,26 @@ source ~/.venvs/tabarena/bin/activate
 
 # get editable external libraries
 cd external_libs
-git clone --branch main https://github.com/autogluon/tabrepo.git
+git clone --branch main https://github.com/autogluon/tabarena.git
 
 # Local install of AutoGluon (mostly needed for getting the latest state of the code)
 git clone --branch master https://github.com/autogluon/autogluon
 ./autogluon/full_install.sh
 
-uv pip install -e tabrepo/[benchmark]
+uv pip install -e tabarena/[benchmark]
 
 # When planning to only run experiments on CPU, also run the following:
 uv pip install -U torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu
 ```
 
-For PyCharm users, remember to mark `tabrepo` under `external_libs` as Source Roots (right click
+For PyCharm users, remember to mark `tabarena` under `external_libs` as Source Roots (right click
 -> Mark Directory as -> Source Root).
 
 Test your installation via the code below. This might take some time to download the foundation models, see
 `tabflow_slurm/benchmarking_setup/download_all_foundation_models.py` to download all models beforehand if needed.
 
 ```bash
-pytest external_libs/tabrepo/tst/benchmark/models/
+pytest external_libs/tabarena/tst/benchmark/models/
 ```
 
 # 📄 Publication for TabArena

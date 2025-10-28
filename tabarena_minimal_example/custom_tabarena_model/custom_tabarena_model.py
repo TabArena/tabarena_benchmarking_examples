@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class CustomRandomForestModel(AbstractModel):
     """Minimal implementation of a model compatible with the scikit-learn API.
     For more details on how to implement an abstract model, see https://auto.gluon.ai/stable/tutorials/tabular/advanced/tabular-custom-model.html
-    and compare to implementations of models under tabrepo.benchmark/models/ag/.
+    and compare to implementations of models under tabarena.benchmark/models/ag/.
     """
 
     ag_key = "CRF"
@@ -109,7 +109,7 @@ def get_configs_for_custom_rf(
         optimally use sequential_fold_fitting=False on SLURM.
     """
     from autogluon.common.space import Int
-    from tabrepo.utils.config_utils import ConfigGenerator
+    from tabarena.utils.config_utils import ConfigGenerator
 
     manual_configs = [
         {},

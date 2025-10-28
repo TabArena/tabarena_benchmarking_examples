@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 from sklearn.model_selection import RepeatedStratifiedKFold
-from tabrepo.benchmark.task import UserTask
+from tabarena.benchmark.task import UserTask
 
 TASK_CACHE_DIR = str(Path(__file__).parent / "tabarena_out" / "local_tasks")
 """Output for artefacts from the evaluation results of the custom model."""

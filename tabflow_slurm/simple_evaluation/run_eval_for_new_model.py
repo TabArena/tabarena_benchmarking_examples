@@ -41,9 +41,9 @@ def run_eval_for_new_models(
         print("Set cache to:", os.getenv("TABARENA_CACHE"))
 
     # Import here such that env var above is used correctly
-    from tabrepo.nips2025_utils.end_to_end import EndToEndResults
-    from tabrepo.tabarena.website_format import format_leaderboard
-    from tabrepo.nips2025_utils.end_to_end_single import EndToEndSingle
+    from tabarena.nips2025_utils.end_to_end import EndToEndResults
+    from tabarena.tabarena.website_format import format_leaderboard
+    from tabarena.nips2025_utils.end_to_end_single import EndToEndSingle
 
     for model in models:
         if not model.only_load_cache:
